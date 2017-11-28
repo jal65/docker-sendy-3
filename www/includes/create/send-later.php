@@ -8,21 +8,16 @@
 	date_default_timezone_set($timezone);//set timezone
 	$campaign_id = mysqli_real_escape_string($mysqli, $_POST['campaign_id']);
 	$email_lists = mysqli_real_escape_string($mysqli, $_POST['email_lists']);
+	$email_lists_excl = mysqli_real_escape_string($mysqli, $_POST['email_lists_excl']);
+	$email_lists_segs = mysqli_real_escape_string($mysqli, $_POST['email_lists_segs']);
+	$email_lists_segs_excl = mysqli_real_escape_string($mysqli, $_POST['email_lists_segs_excl']);
 	$app = $_POST['app'];
 	$send_date = mysqli_real_escape_string($mysqli, $_POST['send_date']);
 	$total_recipients = $_POST['total_recipients2'];
 	$hour = mysqli_real_escape_string($mysqli, $_POST['hour']);
 	$min = mysqli_real_escape_string($mysqli, $_POST['min']);
 	$ampm = mysqli_real_escape_string($mysqli, $_POST['ampm']);
-	if($ampm=='pm' && $hour!=12)
-		$hour += 12;
-	if($ampm=='am' && $hour==12)
-		$hour = 00;
-	$send_date_array = explode('-', $send_date);
-	$month = $send_date_array[0];
-	$day = $send_date_array[1];
-	$year = $send_date_array[2];
-	$the_date = mktime($hour, $min, 0, $month, $day, $year);
+	$the_date = strtotime("$send_date $hour.$min$ampm");
 	
 	//Check if monthly quota needs to be updated
 	$q = 'SELECT allocated_quota, current_quota FROM apps WHERE id = '.$app;
@@ -56,7 +51,8 @@
 	}
 	
 	//Schedule the campaign
-	$q = 'UPDATE campaigns SET send_date = "'.$the_date.'", lists = "'.$email_lists.'", timezone = "'.$timezone.'", quota_deducted = '.$total_recipients.' WHERE id = '.$campaign_id;
+	$q = 'UPDATE campaigns SET send_date = "'.$the_date.'", lists = "'.$email_lists.'", lists_excl = "'.$email_lists_excl.'", segs = "'.$email_lists_segs.'", segs_excl = "'.$email_lists_segs_excl.'", timezone = "'.$timezone.'", quota_deducted = '.$total_recipients.' WHERE id = '.$campaign_id;
 	$r = mysqli_query($mysqli, $q);
 	if ($r) header("Location: ".get_app_info('path')."/app?i=".$app);
+	else echo 'Error: Unable to schedule campaign.';
 ?>

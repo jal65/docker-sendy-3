@@ -17,13 +17,14 @@ $(document).ready(
 		    exec : function () {
 		      // get the editor content
 		      var theData = ckEditor.getData();
-		      $("#campaign-save-only-btn").click();
+		      $('<input>').attr({type: 'hidden',id: 'save-only',name: 'save-only',value: 1}).appendTo('form');
+		      $("#campaign-save-only-btn, #autoresponder-save-only-btn, #save-button").click();
 		    }
 		   });
 		})
 		
 		//Save campaign only
-		$("#campaign-save-only-btn").click(function(e){
+		$("#campaign-save-only-btn, #autoresponder-save-only-btn").click(function(e){
 	        e.preventDefault(); 
 	    	$('<input>').attr({type: 'hidden',id: 'save-only',name: 'save-only',value: 1}).appendTo('form');
 			$("#edit-form").submit();

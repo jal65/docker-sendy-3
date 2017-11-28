@@ -67,7 +67,7 @@
 				  </div>
 				  <input type="hidden" name="id" value="<?php echo get_app_info('app');?>"/>
 				  <input type="hidden" name="list" value="<?php echo $lid;?>"/>
-				  <button type="submit" class="btn" id="c_button"><i class="icon icon-plus"></i> <?php echo _('Add custom field');?></button>
+				  <button type="submit" class="btn btn-inverse" id="c_button"><i class="icon icon-plus"></i> <?php echo _('Add custom field');?></button>
 				</form>
 			</div>
 	    </div>

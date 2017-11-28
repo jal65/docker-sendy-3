@@ -1,6 +1,7 @@
 <?php include('includes/header.php');?>
 <?php include('includes/login/auth.php');?>
 <?php
+	check_simplexml();
 	if(get_app_info('is_sub_user')) 
 	{
 		echo '<script type="text/javascript">window.location="'.addslashes(get_app_info('path')).'/app?i='.get_app_info('restricted_to_app').'"</script>';
@@ -10,7 +11,7 @@
 <div class="row-fluid"> 
 	<div class="span2">
 		<h3><?php echo _('Amazon SES Quota');?></h3><br/>
-		<div class="well">
+		<div class="well sidebar-box">
 			<?php
 				if(get_app_info('s3_key')=='' && get_app_info('s3_secret')==''){}
 				else
@@ -44,15 +45,15 @@
 				
 				<?php if($testAWSCreds=='AccessDenied'):?>
 				<br/>
-				<span style="color:#BB4D47;"><p><strong><?php echo _('Error');?>: AccessDenied</strong></p><p><?php echo _('Your Sendy installation is unable to get your SES quota from Amazon because you did not attach "AmazonSESFullAccess" user policy to your IAM credentials. Please re-do Step 5.2 and 5.3 of the <a href="https://sendy.co/get-started" target="_blank">Get Started Guide</a> carefully to resolve this error.');?></p></span>
+				<span style="color:#BB4D47;"><p><strong><?php echo _('Error');?>: AccessDenied</strong></p><p><?php echo _('Your Sendy installation is unable to get your SES quota from Amazon because you did not attach "AmazonSESFullAccess" user policy to your IAM credentials. Please re-do Step 5.2 and 5.3 of the <a href="https://sendy.co/get-started#step5" target="_blank">Get Started Guide</a> carefully to resolve this error.');?></p></span>
 				
 				<?php elseif($testAWSCreds=='RequestExpired'):?>
 				<br/>
 				<span style="color:#BB4D47;"><p><strong><?php echo _('Error');?>: RequestExpired</strong></p><p><?php echo _('Your Sendy installation is unable to get your SES quota from Amazon because your server clock is out of sync with NTP. To fix this, Amazon requires you to <strong>sync your server clock with NTP</strong>. Request your host to sync your server clock with NTP with the following command via SSH:');?></p><p><code>sudo /usr/sbin/ntpdate 0.north-america.pool.ntp.org 1.north-america.pool.ntp.org 2.north-america.pool.ntp.org 3.north-america.pool.ntp.org</code></p></span>
 				
-				<?php elseif($testAWSCreds=='InvalidClientTokenId'):?>
+				<?php elseif($testAWSCreds=='InvalidClientTokenId' || $testAWSCreds=='SignatureDoesNotMatch'):?>
 				<br/>
-				<span style="color:#BB4D47;"><p><strong><?php echo _('Error');?>: InvalidClientTokenId</strong></p><p><?php echo _('Your Sendy installation is unable to get your SES quota from Amazon because the \'Amazon Web Services Credentials\' set in Sendy\'s main Settings are incorrect. You probably did not copy and pasted your IAM credentials fully or properly into the settings. Please re-do Step 5.2 and 5.3 of the <a href="https://sendy.co/get-started" target="_blank">Get Started Guide</a> carefully to resolve this error.');?></p></span>
+				<span style="color:#BB4D47;"><p><strong><?php echo _('Error');?>: <?php echo $testAWSCreds;?></strong></p><p><?php echo _('Your Sendy installation is unable to get your SES quota from Amazon because the \'Amazon Web Services Credentials\' set in Sendy\'s main Settings are incorrect. You probably did not copy and pasted your IAM credentials fully or properly into the settings. Please re-do Step 5.2 and 5.3 of the <a href="https://sendy.co/get-started#step5" target="_blank">Get Started Guide</a> carefully to resolve this error.');?></p></span>
 				
 				<?php elseif($testAWSCreds=='OptInRequired'):?>
 				<br/>

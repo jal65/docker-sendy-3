@@ -1,7 +1,22 @@
 <?php include('includes/header.php');?>
 <?php include('includes/login/auth.php');?>
 <?php include('includes/app/main.php');?>
-
+<?php
+	check_simplexml();
+	if(get_app_info('is_sub_user')) 
+	{
+		if(get_app_info('app')!=get_app_info('restricted_to_app'))
+		{
+			echo '<script type="text/javascript">window.location="'.addslashes(get_app_info('path')).'/app?i='.get_app_info('restricted_to_app').'"</script>';
+			exit;
+		}
+		else if(get_app_info('reports_only'))
+		{
+			echo '<script type="text/javascript">window.location="'.addslashes(get_app_info('path')).'/reports?i='.get_app_info('restricted_to_app').'"</script>';
+			exit;
+		}
+	}
+?>
 <!-- Validation -->
 <script type="text/javascript" src="<?php echo get_app_info('path');?>/js/validate.js"></script>
 <script type="text/javascript">
@@ -49,7 +64,7 @@
 <div class="row-fluid">
 	<div class="span2">
 		<h3><?php echo _('Amazon SES Quota');?></h3><br/>
-		<div class="well">
+		<div class="well sidebar-box">
 			<?php
 				if(get_app_info('s3_key')=='' && get_app_info('s3_secret')==''){}
 				else
@@ -83,15 +98,15 @@
 				
 				<?php if($testAWSCreds=='AccessDenied'):?>
 				<br/>
-				<span style="color:#BB4D47;"><p><strong><?php echo _('Error');?>: AccessDenied</strong></p><p><?php echo _('Your Sendy installation is unable to get your SES quota from Amazon because you did not attach "AmazonSESFullAccess" user policy to your IAM credentials. Please re-do Step 5.2 and 5.3 of the <a href="https://sendy.co/get-started" target="_blank">Get Started Guide</a> carefully to resolve this error.');?></p></span>
+				<span style="color:#BB4D47;"><p><strong><?php echo _('Error');?>: AccessDenied</strong></p><p><?php echo _('Your Sendy installation is unable to get your SES quota from Amazon because you did not attach "AmazonSESFullAccess" user policy to your IAM credentials. Please re-do Step 5.2 and 5.3 of the <a href="https://sendy.co/get-started#step5" target="_blank">Get Started Guide</a> carefully to resolve this error.');?></p></span>
 				
 				<?php elseif($testAWSCreds=='RequestExpired'):?>
 				<br/>
 				<span style="color:#BB4D47;"><p><strong><?php echo _('Error');?>: RequestExpired</strong></p><p><?php echo _('Your Sendy installation is unable to get your SES quota from Amazon because your server clock is out of sync with NTP. To fix this, Amazon requires you to <strong>sync your server clock with NTP</strong>. Request your host to sync your server clock with NTP with the following command via SSH:');?></p><p><code>sudo /usr/sbin/ntpdate 0.north-america.pool.ntp.org 1.north-america.pool.ntp.org 2.north-america.pool.ntp.org 3.north-america.pool.ntp.org</code></p></span>
 				
-				<?php elseif($testAWSCreds=='InvalidClientTokenId'):?>
+				<?php elseif($testAWSCreds=='InvalidClientTokenId' || $testAWSCreds=='SignatureDoesNotMatch'):?>
 				<br/>
-				<span style="color:#BB4D47;"><p><strong><?php echo _('Error');?>: InvalidClientTokenId</strong></p><p><?php echo _('Your Sendy installation is unable to get your SES quota from Amazon because the \'Amazon Web Services Credentials\' set in Sendy\'s main Settings are incorrect. You probably did not copy and pasted your IAM credentials fully or properly into the settings. Please re-do Step 5.2 and 5.3 of the <a href="https://sendy.co/get-started" target="_blank">Get Started Guide</a> carefully to resolve this error.');?></p></span>
+				<span style="color:#BB4D47;"><p><strong><?php echo _('Error');?>: <?php echo $testAWSCreds;?></strong></p><p><?php echo _('Your Sendy installation is unable to get your SES quota from Amazon because the \'Amazon Web Services Credentials\' set in Sendy\'s main Settings are incorrect. You probably did not copy and pasted your IAM credentials fully or properly into the settings. Please re-do Step 5.2 and 5.3 of the <a href="https://sendy.co/get-started#step5" target="_blank">Get Started Guide</a> carefully to resolve this error.');?></p></span>
 				
 				<?php elseif($testAWSCreds=='OptInRequired'):?>
 				<br/>
@@ -402,7 +417,7 @@
 	    	<h3><?php echo _('Client login details');?></h3><br/>
 	    	<p><strong><?php echo _('Login URL');?></strong>: <?php echo get_app_info('path');?></p>
 		    <p><strong><?php echo _('Login email');?></strong>: <input type="text" name="login_email" id="login_email" value="<?php echo get_login_data('username');?>" style="margin-top: 5px;"/></p>
-		    <div class="alert alert-danger" id="duplicate-login-email" style="display:none;"><i class="icon icon-warning-sign"></i> <?php echo _('This login email is already in use by your main login email address set in your main Settings. Please use another email address.');?> </div>
+		    <div class="alert alert-danger" id="duplicate-login-email" style="display:none;"><i class="icon icon-warning-sign"></i> <?php echo _('This login email is already in use by your main login email address set in your main Settings. Please use another email address or remove the email address from the field.');?> </div>
 	    	<p><strong><?php echo _('Password');?></strong>: <span id="generate-password-wrapper"><a href="javascript:void(0)" style="text-decoration:underline;" id="generate-password"><?php echo _('Generate new password');?></a></span></p>
 	    	<?php if(get_login_data('auth_enabled')):?>
 	    		<p id="2fa-text"><?php echo _('Two-factor authentication is currently <strong class="label label-success">enabled</strong>');?></p>
@@ -472,33 +487,22 @@
 			<br/>
 			
 			<h3><?php echo _('Client privileges');?></h3><br/>
-			<p><?php echo _('By default, your client will have full access to their own brand so they can manage their own lists, subscribers, campaigns, templates and see reports. If you wish to allow your client to view campaign reports only, you can set it below.');?></p>
+			<p><?php echo _('By default, your client will have full access to their own brand so they can manage their own lists, subscribers, campaigns, templates and see reports. You can however adjust these privileges below.');?></p>
 			<p>
-				<div class="btn-group" data-toggle="buttons-radio">
-				  <a href="javascript:void(0)" title="" class="btn" id="full-access"><i class="icon icon-ok"></i> <?php echo _('Client have full access to their own brand');?></a>
-				  <a href="javascript:void(0)" title="" class="btn" id="reports-only"><i class="icon icon-zoom-in"></i> <?php echo _('Client can only view campaign reports');?></a>
+				<div class="dashed-box">
+					<div class="checkbox">
+					  <label><input type="checkbox" name="campaigns" <?php echo get_app_data('campaigns_only')==0 ? 'checked' : '';?>>Client can access campaigns</label>
+					</div>
+					<div class="checkbox">
+					  <label><input type="checkbox" name="templates" <?php echo get_app_data('templates_only')==0 ? 'checked' : '';?>>Client can access templates</label>
+					</div>
+					<div class="checkbox">
+					  <label><input type="checkbox" name="lists-subscribers" <?php echo get_app_data('lists_only')==0 ? 'checked' : '';?>>Client can access lists and subscribers</label>
+					</div>
+					<div class="checkbox">
+					  <label><input type="checkbox" name="reports" <?php echo get_app_data('reports_only')==0 ? 'checked' : '';?>>Client can access campaign reports</label>
+					</div>
 				</div>
-				<script type="text/javascript">
-					$(document).ready(function() {
-						<?php 
-							$reports_only = get_app_data('reports_only');
-							if($reports_only==0):
-						?>
-						$("#full-access").button('toggle');
-						$("#reports").val("0");
-						<?php else:?>
-						$("#reports-only").button('toggle');
-						$("#reports").val("1");
-						<?php endif;?>
-						
-						$("#full-access").click(function(){
-							$("#reports").val("0");
-						});
-						$("#reports-only").click(function(){
-							$("#reports").val("1");
-						});
-					});
-				</script>
 			</p>
 	    </div>
     	
@@ -653,7 +657,7 @@
 	        </div>
         </div>
         
-        <input type="hidden" name="reports" id="reports" value="">
+        <input type="hidden" name="lists" id="lists" value="">
         
         <button type="submit" class="btn btn-inverse"><i class="icon-ok icon-white"></i> <?php echo _('Save');?></button>
         

@@ -23,7 +23,10 @@
 	$smtp_password = mysqli_real_escape_string($mysqli, $_POST['smtp_password']);
 	$language = mysqli_real_escape_string($mysqli, $_POST['language']);
 	$choose_limit = mysqli_real_escape_string($mysqli, $_POST['choose-limit']);
-	$reports = mysqli_real_escape_string($mysqli, $_POST['reports']);
+	$campaigns = isset($_POST['campaigns']) ? 0 : 1;
+	$templates = isset($_POST['templates']) ? 0 : 1;
+	$lists = isset($_POST['lists-subscribers']) ? 0 : 1;
+	$reports = isset($_POST['reports']) ? 0 : 1;
 	if($choose_limit=='custom')
 	{
 		$monthly_limit = mysqli_real_escape_string($mysqli, $_POST['monthly-limit']);
@@ -49,7 +52,7 @@
 	//                      FUNCTIONS                       //
 	//------------------------------------------------------//
 	
-	$q = 'INSERT INTO apps (userID, app_name, from_name, from_email, reply_to, allowed_attachments, currency, delivery_fee, cost_per_recipient, smtp_host, smtp_port, smtp_ssl, smtp_username, smtp_password, app_key, allocated_quota, day_of_reset, month_of_next_reset, reports_only) VALUES ('.get_app_info('userID').', "'.$app_name.'", "'.$from_name.'", "'.$from_email.'", "'.$reply_to.'", "'.$allowed_attachments.'", "'.$currency.'", "'.$delivery_fee.'", "'.$cost_per_recipient.'", "'.$smtp_host.'", "'.$smtp_port.'", "'.$smtp_ssl.'", "'.$smtp_username.'", "'.$smtp_password.'", "'.ran_string(30, 30, true, false, true).'", '.$monthly_limit.', '.$reset_on_day.', "'.$month_to_reset.'", '.$reports.')';
+	$q = 'INSERT INTO apps (userID, app_name, from_name, from_email, reply_to, allowed_attachments, currency, delivery_fee, cost_per_recipient, smtp_host, smtp_port, smtp_ssl, smtp_username, smtp_password, app_key, allocated_quota, day_of_reset, month_of_next_reset, reports_only, campaigns_only, templates_only, lists_only) VALUES ('.get_app_info('userID').', "'.$app_name.'", "'.$from_name.'", "'.$from_email.'", "'.$reply_to.'", "'.$allowed_attachments.'", "'.$currency.'", "'.$delivery_fee.'", "'.$cost_per_recipient.'", "'.$smtp_host.'", "'.$smtp_port.'", "'.$smtp_ssl.'", "'.$smtp_username.'", "'.$smtp_password.'", "'.ran_string(30, 30, true, false, true).'", '.$monthly_limit.', '.$reset_on_day.', "'.$month_to_reset.'", '.$reports.', '.$campaigns.', '.$templates.', '.$lists.')';
 	$r = mysqli_query($mysqli, $q);
 	if ($r)
 	{

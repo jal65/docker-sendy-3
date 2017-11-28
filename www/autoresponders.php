@@ -11,8 +11,6 @@
 	    global $dbPass;
 	    global $dbName;
 	    global $dbPort;
-        global $environment;
-        global $testEmail;
 	    
 	    // Attempt to connect to database server
 	    if(isset($dbPort)) $mysqli = new mysqli($dbHost, $dbUser, $dbPass, $dbName, $dbPort);
@@ -58,15 +56,26 @@
 	    }  
 	}
 	
+	$today = time();
+	
 	//Current date & time
 	if($user_timezone!='') date_default_timezone_set($user_timezone);
-	$time = floor(time()/60)*60;
+	$time = round($today/60)*60;
 	$current_day = strftime("%d", $time);
 	$current_month = strftime("%b", $time);
 	$current_year = strftime("%G", $time);
 	$current_hour = strftime("%H", $time);
 	$current_mins = strftime("%M", $time);
-    $current_time = $time;
+	$current_time = strtotime($current_day.' '.$current_month.' '.$current_year.' '.$current_hour.$current_mins.'H');
+	
+	//convert date tags
+	$currentdaynumber = strftime('%d', $today);
+	$currentday = strftime('%A', $today);
+	$currentmonthnumber = strftime('%m', $today);
+	$currentmonth = strftime('%B', $today);
+	$currentyear = strftime('%Y', $today);
+	$unconverted_date = array('[currentdaynumber]', '[currentday]', '[currentmonthnumber]', '[currentmonth]', '[currentyear]');
+	$converted_date = array($currentdaynumber, $currentday, $currentmonthnumber, $currentmonth, $currentyear);
 	
 	//get user details
 	$q2 = 'SELECT s3_key, s3_secret FROM login ORDER BY id ASC LIMIT 1';
@@ -81,7 +90,7 @@
 	}
 	
 	//Process Type 1 autoresponders (new subscriber)
-	$q = 'SELECT ares_emails.id, ares_emails.from_name, ares_emails.from_email, ares_emails.reply_to, ares_emails.title, ares_emails.plain_text, ares_emails.html_text, ares_emails.query_string, ares_emails.time_condition, ares_emails.timezone, ares_emails.opens_tracking, ares_emails.links_tracking, lists.id AS `list` FROM ares, ares_emails, lists WHERE ares_emails.ares_id = ares.id AND (lists.parent_list=ares.list OR lists.id=ares.list) AND ares.type = 1';
+	$q = 'SELECT ares_emails.id, ares_emails.from_name, ares_emails.from_email, ares_emails.reply_to, ares_emails.title, ares_emails.plain_text, ares_emails.html_text, ares_emails.query_string, ares_emails.time_condition, ares_emails.timezone, ares_emails.opens_tracking, ares_emails.links_tracking, ares.list FROM ares, ares_emails WHERE ares_emails.ares_id = ares.id AND ares.type = 1 AND ares_emails.enabled = 1';
 	$r = mysqli_query($mysqli, $q);
 	if ($r && mysqli_num_rows($r) > 0)
 	{
@@ -124,8 +133,9 @@
 				foreach($matches as $var)
 				{    
 					$var = $query_string!='' ? ((strpos($var,'?') !== false) ? $var.'&'.$query_string : $var.'?'.$query_string) : $var;
-					if(substr($var, 0, 1)!="#" && substr($var, 0, 6)!="mailto" && substr($var, 0, 3)!="tel" && substr($var, 0, 3)!="sms" && substr($var, 0, 13)!="[unsubscribe]" && substr($var, 0, 12)!="[webversion]" && !strpos($var, 'fonts.googleapis.com'))
+					if(substr($var, 0, 1)!="#" && substr($var, 0, 6)!="mailto" && substr($var, 0, 3)!="ftp" && substr($var, 0, 3)!="tel" && substr($var, 0, 3)!="sms" && substr($var, 0, 13)!="[unsubscribe]" && substr($var, 0, 12)!="[webversion]" && !strpos($var, 'fonts.googleapis.com'))
 					{
+						$var = str_replace($unconverted_date, $converted_date, $var);
 				    	array_push($links, $var);
 				    }
 				}
@@ -159,7 +169,7 @@
 			}
 			
 			//select subscribers
-			$q2 = 'SELECT * FROM subscribers WHERE list = '.$list.' AND unsubscribed = 0 AND bounced = 0 AND complaint = 0 AND confirmed = 1 AND join_date is not NULL GROUP BY email ORDER BY id ASC';
+			$q2 = 'SELECT id, name, email, custom_fields, join_date FROM subscribers WHERE list = '.$list.' AND unsubscribed = 0 AND bounced = 0 AND complaint = 0 AND confirmed = 1 AND join_date is not NULL ORDER BY id ASC';
 			$r2 = mysqli_query($mysqli, $q2);
 			if ($r2 && mysqli_num_rows($r2) > 0)
 			{
@@ -185,10 +195,10 @@
 							
 							//prevent execution timeout
 					    	set_time_limit(0);
-					    	
-					    	$html_treated = $html;
-							$plain_treated = $plain_text;
-							$title_treated = $title;
+							
+							$html_treated = str_replace($unconverted_date, $converted_date, $html);
+							$plain_treated = str_replace($unconverted_date, $converted_date, $plain_text);
+							$title_treated = str_replace($unconverted_date, $converted_date, $title);
 							
 							//replace new links on HTML code
 							$ql = 'SELECT id, link FROM links WHERE ares_emails_id = '.$ares_id.' ORDER BY id DESC';
@@ -266,10 +276,7 @@
 											    
 											    //if tag matches a custom field
 											    if($field==$key)
-                                                {
-                                                    if($key=='to') {
-                                                        $extraTo = $custom_values_array[$j];
-                                                    }
+											    {
 											    	//if custom field is empty, use fallback
 											    	if($custom_values_array[$j]=='')
 												    	$title_treated = str_replace($tag, $fallback, $title_treated);
@@ -342,11 +349,8 @@
 											    $key = str_replace(' ', '', $cf_array[0]);
 											    
 											    //if tag matches a custom field
-                                                if($field==$key)
-                                                {
-                                                    if($key=='to') {
-                                                        $extraTo = $custom_values_array[$j];
-                                                    }
+											    if($field==$key)
+											    {
 											    	//if custom field is empty, use fallback
 											    	if($custom_values_array[$j]=='')
 												    	$html_treated = str_replace($tag, $fallback, $html_treated);
@@ -418,11 +422,8 @@
 											    $key = str_replace(' ', '', $cf_array[0]);
 											    
 											    //if tag matches a custom field
-                                                if($field==$key)
+											    if($field==$key)
 											    {
-                                                    if($key=='to') {
-                                                        $extraTo = $custom_values_array[$j];
-                                                    }
 											    	//if custom field is empty, use fallback
 											    	if($custom_values_array[$j]=='')
 														$plain_treated = str_replace($tag, $fallback, $plain_treated);
@@ -463,20 +464,6 @@
 							$html_treated = str_replace('[Email]', $email, $html_treated);
 							$plain_treated = str_replace('[Email]', $email, $plain_treated);
 							$title_treated = str_replace('[Email]', $email, $title_treated);
-							
-							//convert date tags
-							if($user_timezone!='') date_default_timezone_set($user_timezone);
-							$today = time();
-							$currentdaynumber = strftime('%d', $today);
-							$currentday = strftime('%A', $today);
-							$currentmonthnumber = strftime('%m', $today);
-							$currentmonth = strftime('%B', $today);
-							$currentyear = strftime('%Y', $today);
-							$unconverted_date = array('[currentdaynumber]', '[currentday]', '[currentmonthnumber]', '[currentmonth]', '[currentyear]');
-							$converted_date = array($currentdaynumber, $currentday, $currentmonthnumber, $currentmonth, $currentyear);
-							$html_treated = str_replace($unconverted_date, $converted_date, $html_treated);
-							$plain_treated = str_replace($unconverted_date, $converted_date, $plain_treated);
-							$title_treated = str_replace($unconverted_date, $converted_date, $title_treated);
 					    	
 					    	//If opens tracking is enabled, add 1 x 1 px tracking image
 					    	if($opens_tracking)
@@ -544,7 +531,7 @@
 	}
 	
 	//Process Type 2 autoresponders (anniversary) *Ignore year, send annually
-	$q = 'SELECT ares_emails.id, ares_emails.from_name, ares_emails.from_email, ares_emails.reply_to, ares_emails.title, ares_emails.plain_text, ares_emails.html_text, ares_emails.query_string, ares_emails.time_condition, ares_emails.timezone, ares_emails.opens_tracking, ares_emails.links_tracking, lists.id AS `list`, custom_field FROM ares, ares_emails, lists WHERE ares_emails.ares_id = ares.id AND (lists.parent_list=ares.list OR lists.id=ares.list) AND ares.type = 2';
+	$q = 'SELECT ares_emails.id, ares_emails.from_name, ares_emails.from_email, ares_emails.reply_to, ares_emails.title, ares_emails.plain_text, ares_emails.html_text, ares_emails.query_string, ares_emails.time_condition, ares_emails.timezone, ares_emails.opens_tracking, ares_emails.links_tracking, ares.list, custom_field FROM ares, ares_emails WHERE ares_emails.ares_id = ares.id AND ares.type = 2 AND ares_emails.enabled = 1';
 	$r = mysqli_query($mysqli, $q);
 	if ($r && mysqli_num_rows($r) > 0)
 	{
@@ -585,8 +572,9 @@
 				foreach($matches as $var)
 				{    
 					$var = $query_string!='' ? ((strpos($var,'?') !== false) ? $var.'&'.$query_string : $var.'?'.$query_string) : $var;
-					if(substr($var, 0, 1)!="#" && substr($var, 0, 6)!="mailto" && substr($var, 0, 3)!="tel" && substr($var, 0, 3)!="sms" && substr($var, 0, 13)!="[unsubscribe]" && substr($var, 0, 12)!="[webversion]" && !strpos($var, 'fonts.googleapis.com'))
+					if(substr($var, 0, 1)!="#" && substr($var, 0, 6)!="mailto" && substr($var, 0, 3)!="ftp" && substr($var, 0, 3)!="tel" && substr($var, 0, 3)!="sms" && substr($var, 0, 13)!="[unsubscribe]" && substr($var, 0, 12)!="[webversion]" && !strpos($var, 'fonts.googleapis.com'))
 					{
+						$var = str_replace($unconverted_date, $converted_date, $var);
 				    	array_push($links, $var);
 				    }
 				}
@@ -620,7 +608,7 @@
 			}
 			
 			//select subscribers
-			$q2 = 'SELECT subscribers.*, lists.custom_fields as lists_custom_fields FROM subscribers, lists WHERE subscribers.list = '.$list.' AND lists.id = '.$list.' AND subscribers.unsubscribed = 0 AND subscribers.bounced = 0 AND subscribers.complaint = 0 AND subscribers.confirmed = 1 GROUP BY subscribers.email ORDER BY subscribers.id ASC';
+			$q2 = 'SELECT subscribers.id, subscribers.name, subscribers.email, subscribers.custom_fields, lists.custom_fields as lists_custom_fields FROM subscribers LEFT JOIN lists ON subscribers.list = lists.id WHERE lists.id = '.$list.' AND subscribers.unsubscribed = 0 AND subscribers.bounced = 0 AND subscribers.complaint = 0 AND subscribers.confirmed = 1 ORDER BY subscribers.id ASC';
 			$r2 = mysqli_query($mysqli, $q2);
 			if ($r2 && mysqli_num_rows($r2) > 0)
 			{
@@ -666,9 +654,9 @@
 										//prevent execution timeout
 								    	set_time_limit(0);
 								    	
-								    	$html_treated = $html;
-										$plain_treated = $plain_text;
-										$title_treated = $title;
+								    	$html_treated = str_replace($unconverted_date, $converted_date, $html);
+										$plain_treated = str_replace($unconverted_date, $converted_date, $plain_text);
+										$title_treated = str_replace($unconverted_date, $converted_date, $title);
 										
 										//replace new links on HTML code
 										$ql = 'SELECT id, link FROM links WHERE ares_emails_id = '.$ares_id.' ORDER BY id DESC';
@@ -745,11 +733,8 @@
 														    $key = str_replace(' ', '', $cf_array[0]);
 														    
 														    //if tag matches a custom field
-                                                            if($field==$key)
-                                                            {
-                                                                if($key=='to') {
-                                                                    $extraTo = $custom_values_array[$j];
-                                                                }
+														    if($field==$key)
+														    {
 														    	//if custom field is empty, use fallback
 														    	if($custom_values_array[$j]=='')
 															    	$title_treated = str_replace($tag, $fallback, $title_treated);
@@ -822,11 +807,8 @@
 														    $key = str_replace(' ', '', $cf_array[0]);
 														    
 														    //if tag matches a custom field
-                                                            if($field==$key)
-                                                            {
-                                                                if($key=='to') {
-                                                                    $extraTo = $custom_values_array[$j];
-                                                                }
+														    if($field==$key)
+														    {
 														    	//if custom field is empty, use fallback
 														    	if($custom_values_array[$j]=='')
 															    	$html_treated = str_replace($tag, $fallback, $html_treated);
@@ -898,11 +880,8 @@
 														    $key = str_replace(' ', '', $cf_array[0]);
 														    
 														    //if tag matches a custom field
-                                                            if($field==$key)
-                                                            {
-                                                                if($key=='to') {
-                                                                    $extraTo = $custom_values_array[$j];
-                                                                }
+														    if($field==$key)
+														    {
 														    	//if custom field is empty, use fallback
 														    	if($custom_values_array[$j]=='')
 																	$plain_treated = str_replace($tag, $fallback, $plain_treated);
@@ -943,20 +922,6 @@
 										$html_treated = str_replace('[Email]', $email, $html_treated);
 										$plain_treated = str_replace('[Email]', $email, $plain_treated);
 										$title_treated = str_replace('[Email]', $email, $title_treated);
-										
-										//convert date tags
-										if($user_timezone!='') date_default_timezone_set($user_timezone);
-										$today = time();
-										$currentdaynumber = strftime('%d', $today);
-										$currentday = strftime('%A', $today);
-										$currentmonthnumber = strftime('%m', $today);
-										$currentmonth = strftime('%B', $today);
-										$currentyear = strftime('%Y', $today);
-										$unconverted_date = array('[currentdaynumber]', '[currentday]', '[currentmonthnumber]', '[currentmonth]', '[currentyear]');
-										$converted_date = array($currentdaynumber, $currentday, $currentmonthnumber, $currentmonth, $currentyear);
-										$html_treated = str_replace($unconverted_date, $converted_date, $html_treated);
-										$plain_treated = str_replace($unconverted_date, $converted_date, $plain_treated);
-										$title_treated = str_replace($unconverted_date, $converted_date, $title_treated);
 								    	
 								    	//If opens tracking is enabled, add 1 x 1 px tracking image
 								    	if($opens_tracking)
@@ -1028,7 +993,7 @@
 	}
 	
 	//Process Type 3 autoresponders (send at a specific date)
-	$q = 'SELECT ares_emails.id, ares_emails.from_name, ares_emails.from_email, ares_emails.reply_to, ares_emails.title, ares_emails.plain_text, ares_emails.html_text, ares_emails.query_string, ares_emails.time_condition, ares_emails.timezone, ares_emails.opens_tracking, ares_emails.links_tracking, lists.id AS `list`, lists.parent_list, custom_field FROM ares, ares_emails, lists WHERE ares_emails.ares_id = ares.id AND (lists.parent_list=ares.list OR lists.id=ares.list) AND ares.type = 3';
+	$q = 'SELECT ares_emails.id, ares_emails.from_name, ares_emails.from_email, ares_emails.reply_to, ares_emails.title, ares_emails.plain_text, ares_emails.html_text, ares_emails.query_string, ares_emails.time_condition, ares_emails.timezone, ares_emails.opens_tracking, ares_emails.links_tracking, ares.list, custom_field FROM ares, ares_emails WHERE ares_emails.ares_id = ares.id AND ares.type = 3 AND ares_emails.enabled = 1';
 	$r = mysqli_query($mysqli, $q);
 	if ($r && mysqli_num_rows($r) > 0)
 	{
@@ -1046,7 +1011,6 @@
 			$time_condition = $row['time_condition'];
 			$ares_custom_field = $row['custom_field'];
 			$list = $row['list'];
-            $parent_list = $row['parent_list'];
 			$opens_tracking = $row['opens_tracking'];
 			$links_tracking = $row['links_tracking'];
 			
@@ -1071,8 +1035,9 @@
 				foreach($matches as $var)
 				{
 					$var = $query_string!='' ? ((strpos($var,'?') !== false) ? $var.'&'.$query_string : $var.'?'.$query_string) : $var;    
-					if(substr($var, 0, 1)!="#" && substr($var, 0, 6)!="mailto" && substr($var, 0, 3)!="tel" && substr($var, 0, 3)!="sms" && substr($var, 0, 13)!="[unsubscribe]" && substr($var, 0, 12)!="[webversion]" && !strpos($var, 'fonts.googleapis.com'))
+					if(substr($var, 0, 1)!="#" && substr($var, 0, 6)!="mailto" && substr($var, 0, 3)!="ftp" && substr($var, 0, 3)!="tel" && substr($var, 0, 3)!="sms" && substr($var, 0, 13)!="[unsubscribe]" && substr($var, 0, 12)!="[webversion]" && !strpos($var, 'fonts.googleapis.com'))
 					{
+						$var = str_replace($unconverted_date, $converted_date, $var);
 				    	array_push($links, $var);
 				    }
 				}
@@ -1106,7 +1071,7 @@
 			}
 			
 			//select subscribers
-			$q2 = 'SELECT subscribers.*, lists.custom_fields as lists_custom_fields FROM subscribers, lists WHERE subscribers.list = '.$list.' AND lists.id = '.$list.' AND subscribers.unsubscribed = 0 AND subscribers.bounced = 0 AND subscribers.complaint = 0 AND subscribers.confirmed = 1 GROUP BY subscribers.email ORDER BY subscribers.id ASC';
+			$q2 = 'SELECT subscribers.id, subscribers.name, subscribers.email, subscribers.custom_fields, lists.custom_fields as lists_custom_fields FROM subscribers LEFT JOIN lists ON subscribers.list = lists.id WHERE lists.id = '.$list.' AND subscribers.unsubscribed = 0 AND subscribers.bounced = 0 AND subscribers.complaint = 0 AND subscribers.confirmed = 1 ORDER BY subscribers.id ASC';
 			$r2 = mysqli_query($mysqli, $q2);
 			if ($r2 && mysqli_num_rows($r2) > 0)
 			{
@@ -1114,7 +1079,6 @@
 				
 			    while($row = mysqli_fetch_array($r2))
 			    {
-			        unset($extraTo);
 			    	$subscriber_id = $row['id'];
 					$name = stripslashes($row['name']);
 					$email = stripslashes($row['email']);
@@ -1135,17 +1099,16 @@
 							
 							if($lcf_array[0] == $ares_custom_field && $lcf_array[1]=='Date')
 							{
-
 								if($custom_fields_array[$i]!='')
 								{
 									date_default_timezone_set($user_timezone);
 									$cf_day = strftime("%d", $custom_fields_array[$i]);
 									$cf_month = strftime("%b", $custom_fields_array[$i]);
 									$cf_year = strftime("%G", $custom_fields_array[$i]);
-									$cf_hour = strftime("%H", $custom_fields_array[$i]);
-                                    $cf_mins = strftime("%M", $custom_fields_array[$i]);
+									$cf_hour = '00';
+									$cf_mins = '00';
 									$cf_time = strtotime($cf_day.' '.$cf_month.' '.$cf_year.' '.$cf_hour.'.'.$cf_mins.' '.$time_condition);
-
+									
 									//if current time matches autoresponder options
 									if($current_time == $cf_time)
 									{
@@ -1154,9 +1117,9 @@
 										//prevent execution timeout
 								    	set_time_limit(0);
 								    	
-								    	$html_treated = $html;
-										$plain_treated = $plain_text;
-										$title_treated = $title;
+								    	$html_treated = str_replace($unconverted_date, $converted_date, $html);
+										$plain_treated = str_replace($unconverted_date, $converted_date, $plain_text);
+										$title_treated = str_replace($unconverted_date, $converted_date, $title);
 										
 										//replace new links on HTML code
 										$ql = 'SELECT id, link FROM links WHERE ares_emails_id = '.$ares_id.' ORDER BY id DESC';
@@ -1216,12 +1179,8 @@
 													$title_treated = str_replace($tag, $fallback, $title_treated);
 												//otherwise, replace custom field tag
 												else
-												{
-													$custom_fields_list = $list;
-                                                    if(isset($parent_list) && !empty($parent_list)) {
-                                                            $custom_fields_list = $parent_list;
-                                                    }
-                                                    $q5 = 'SELECT custom_fields FROM lists WHERE id = '.$custom_fields_list;
+												{					
+													$q5 = 'SELECT custom_fields FROM lists WHERE id = '.$list;
 													$r5 = mysqli_query($mysqli, $q5);
 													if ($r5)
 													{
@@ -1237,11 +1196,8 @@
 														    $key = str_replace(' ', '', $cf_array[0]);
 														    
 														    //if tag matches a custom field
-                                                            if($field==$key)
-                                                            {
-                                                                if($key=='to') {
-                                                                    $extraTo = $custom_values_array[$j];
-                                                                }
+														    if($field==$key)
+														    {
 														    	//if custom field is empty, use fallback
 														    	if($custom_values_array[$j]=='')
 															    	$title_treated = str_replace($tag, $fallback, $title_treated);
@@ -1298,11 +1254,8 @@
 												//otherwise, replace custom field tag
 												else
 												{					
-                                                    $custom_fields_list = $list;
-                                                    if(isset($parent_list) && !empty($parent_list)) {
-                                                            $custom_fields_list = $parent_list;
-                                                    }
-                                                    $q5 = 'SELECT custom_fields FROM lists WHERE id = '.$custom_fields_list;													$r5 = mysqli_query($mysqli, $q5);
+													$q5 = 'SELECT custom_fields FROM lists WHERE id = '.$list;
+													$r5 = mysqli_query($mysqli, $q5);
 													if ($r5)
 													{
 													    while($row2 = mysqli_fetch_array($r5)) $l_custom_fields = $row2['custom_fields'];
@@ -1317,11 +1270,8 @@
 														    $key = str_replace(' ', '', $cf_array[0]);
 														    
 														    //if tag matches a custom field
-                                                            if($field==$key)
-                                                            {
-                                                                if($key=='to') {
-                                                                    $extraTo = $custom_values_array[$j];
-                                                                }
+														    if($field==$key)
+														    {
 														    	//if custom field is empty, use fallback
 														    	if($custom_values_array[$j]=='')
 															    	$html_treated = str_replace($tag, $fallback, $html_treated);
@@ -1377,11 +1327,7 @@
 												//otherwise, replace custom field tag
 												else
 												{					
-													$custom_fields_list = $list;
-                                                    if(isset($parent_list) && !empty($parent_list)) {
-                                                            $custom_fields_list = $parent_list;
-                                                    }
-                                                    $q5 = 'SELECT custom_fields FROM lists WHERE id = '.$custom_fields_list;
+													$q5 = 'SELECT custom_fields FROM lists WHERE id = '.$list;
 													$r5 = mysqli_query($mysqli, $q5);
 													if ($r5)
 													{
@@ -1395,13 +1341,10 @@
 													    {
 														    $cf_array = explode(':', $custom_fields_array[$j]);
 														    $key = str_replace(' ', '', $cf_array[0]);
-
+														    
 														    //if tag matches a custom field
-                                                            if($field==$key)
-                                                            {
-                                                                if($key=='to') {
-                                                                    $extraTo = $custom_values_array[$j];
-                                                                }
+														    if($field==$key)
+														    {
 														    	//if custom field is empty, use fallback
 														    	if($custom_values_array[$j]=='')
 																	$plain_treated = str_replace($tag, $fallback, $plain_treated);
@@ -1442,20 +1385,6 @@
 										$html_treated = str_replace('[Email]', $email, $html_treated);
 										$plain_treated = str_replace('[Email]', $email, $plain_treated);
 										$title_treated = str_replace('[Email]', $email, $title_treated);
-										
-										//convert date tags
-										if($user_timezone!='') date_default_timezone_set($user_timezone);
-										$today = time();
-										$currentdaynumber = strftime('%d', $today);
-										$currentday = strftime('%A', $today);
-										$currentmonthnumber = strftime('%m', $today);
-										$currentmonth = strftime('%B', $today);
-										$currentyear = strftime('%Y', $today);
-										$unconverted_date = array('[currentdaynumber]', '[currentday]', '[currentmonthnumber]', '[currentmonth]', '[currentyear]');
-										$converted_date = array($currentdaynumber, $currentday, $currentmonthnumber, $currentmonth, $currentyear);
-										$html_treated = str_replace($unconverted_date, $converted_date, $html_treated);
-										$plain_treated = str_replace($unconverted_date, $converted_date, $plain_treated);
-										$title_treated = str_replace($unconverted_date, $converted_date, $title_treated);
 								    	
 								    	//If opens tracking is enabled, add 1 x 1 px tracking image
 								    	if($opens_tracking)
@@ -1482,23 +1411,6 @@
 											$mail->Username = $smtp_username;  
 											$mail->Password = $smtp_password;
 										}
-
-                                        if(!$environment || $environment!='production') {
-                                            if(!$environment) {
-                                                $title_treated = '[development] '. $title_treated;
-                                            }
-                                            else {
-                                                $title_treated = '['.$environment.'] '.$title_treated;
-                                            }
-                                            $html_treated = $html_treated. '\n<br>Original dest: '.$email ;
-                                            $plain_treated = $plain_treated. '\nOriginal dest: '.$email ;
-                                            $email = $testEmail;
-                                            $user_email = $testEmail;
-                                            if(isset($extraTo)) {
-                                                $extraTo = $testEmail;
-                                            }
-                                        }
-
 										$mail->Timezone   = $user_timezone;
 										$mail->CharSet	  =	"UTF-8";
 										$mail->From       = $from_email;
@@ -1508,9 +1420,6 @@
 										$mail->Body = $html_treated;
 										$mail->IsHTML(true);
 										$mail->AddAddress($email, $name);
-										if(isset($extraTo)) {
-                                            $mail->AddAddress($extraTo);
-										}
 										$mail->AddReplyTo($reply_to, $from_name);
 										$mail->AddCustomHeader('List-Unsubscribe: <'.APP_PATH.'/unsubscribe/'.short($email).'/'.short($list).'/'.short($ares_id).'/a>');
 										$server_path_array = explode('autoresponders.php', $_SERVER['SCRIPT_FILENAME']);

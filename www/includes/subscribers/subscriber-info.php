@@ -332,11 +332,15 @@
 		  			$cty = country_code_to_country($country);
 		  			if($cty=='')
 		  				$cty = _('Not detected');
-			  		echo '
-				  	<tr>
-				      <td><a href="'.get_app_info('path').'/report?i='.$app.'&c='.$campaign_id.'" title="'._('View report for').' '.$title.'">'.$title.'</a></td>
-				      <td>'.$open_count.'</td>
-				    ';
+		  				
+		  			echo '<tr>';
+		  			
+		  			if(!get_app_info('is_sub_user') || (get_app_info('is_sub_user') && get_app_info('reports_only')==0))
+				  		echo '<td><a href="'.get_app_info('path').'/report?i='.$app.'&c='.$campaign_id.'" title="'._('View report for').' '.$title.'">'.$title.'</a></td>';
+				  	else
+				  		echo '<td>'.$title.'</td>';
+				    
+				    echo '<td>'.$open_count.'</td>';
 				    
 				    if(count($link_array)==0)
 				    	echo '<td>0</td>';

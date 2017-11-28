@@ -37,6 +37,8 @@
 <?php
 	include('includes/helpers/short.php');
 	
+	$time = time();
+	
 	//get variable
 	$i = mysqli_real_escape_string($mysqli, $_GET['i']);
 	if($i=='')
@@ -146,7 +148,7 @@
 	$matches = array_unique($matches[1]);
 	foreach($matches as $var)
 	{    
-		if($var!="#" && substr($var, 0, 6)!="mailto" && substr($var, 0, 3)!="tel" && substr($var, 0, 3)!="sms")
+		if($var!="#" && substr($var, 0, 6)!="mailto" && substr($var, 0, 3)!="ftp" && substr($var, 0, 3)!="tel" && substr($var, 0, 3)!="sms")
 		{
 	    	array_push($links, $var);
 	    }
@@ -301,6 +303,7 @@
 	
 	//Update click count
 	//if this is an autoresponder web version,
+	$val = '';
 	if(count($i_array)==4 && $i_array[3]=='a')
 		$q = 'SELECT clicks, link FROM links WHERE link = "'.APP_PATH.'/w/'.$i_array[2].'/a"';
 	else
@@ -325,7 +328,7 @@
 	//if this is an autoresponder web version,
 	if(count($i_array)==4 && $i_array[3]=='a')
 	{
-		if($links_tracking)
+		if($links_tracking && !empty($val))
 		{
 			$q = 'UPDATE links SET clicks = "'.$val.'" WHERE link = "'.APP_PATH.'/w/'.$i_array[2].'/a"';
 			mysqli_query($mysqli, $q);
@@ -333,7 +336,7 @@
 	}
 	else
 	{
-		if($links_tracking)
+		if($links_tracking && !empty($val))
 		{
 			$q = 'UPDATE links SET clicks = "'.$val.'" WHERE link = "'.APP_PATH.'/w/'.$i_array[2].'"';
 			mysqli_query($mysqli, $q);
@@ -367,6 +370,11 @@
 			if($opens_tracking) 
 				file_get_contents_curl(APP_PATH.'/t/'.$i_array[2].'/'.$i_array[0]);
 	}
+	
+	//Update subscriber's timestamp
+	$q = 'UPDATE subscribers SET timestamp = "'.$time.'" WHERE id = '.$subscriber_id;
+	mysqli_query($mysqli, $q);
+	
 	function file_get_contents_curl($url) 
 	{
 		$ch = curl_init();

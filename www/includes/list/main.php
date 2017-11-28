@@ -97,7 +97,7 @@
 		{
 			while($row = mysqli_fetch_array($r))
 		    {
-				return $row['COUNT(list)'];
+				return number_format($row['COUNT(list)']);
 		    } 
 		}
 	}
@@ -109,13 +109,15 @@
 		global $mysqli;
 		$q = 'SELECT COUNT(list) FROM subscribers use index (s_list) WHERE list = '.$lid.' AND unsubscribed = 1';
 		$r = mysqli_query($mysqli, $q);
-		if ($r) while($row = mysqli_fetch_array($r)) return $row['COUNT(list)'];
+		if ($r) while($row = mysqli_fetch_array($r)) return number_format($row['COUNT(list)']);
 	}
 	
 	//------------------------------------------------------//
 	function get_unsubscribers_percentage($subscribers, $unsubscribers)
 	//------------------------------------------------------//
 	{
+		$subscribers = str_replace(',', '', $subscribers);
+		$unsubscribers = str_replace(',', '', $unsubscribers);
 		$sub_unsub_total = $subscribers+$unsubscribers;
 		$unsub_percentage = $sub_unsub_total==0 ? round($unsubscribers * 100, 2) : round($unsubscribers / ($sub_unsub_total) * 100, 2);
 		return $unsub_percentage;
@@ -128,13 +130,15 @@
 		global $mysqli;
 		$q = 'SELECT COUNT(list) FROM subscribers use index (s_list) WHERE list = '.$lid.' AND bounced = 1';
 		$r = mysqli_query($mysqli, $q);
-		if ($r) while($row = mysqli_fetch_array($r)) return $row['COUNT(list)'];
+		if ($r) while($row = mysqli_fetch_array($r)) return number_format($row['COUNT(list)']);
 	}
 	
 	//------------------------------------------------------//
 	function get_bounced_percentage($bouncers, $subscribers)
 	//------------------------------------------------------//
 	{
+		$subscribers = str_replace(',', '', $subscribers);
+		$bouncers = str_replace(',', '', $bouncers);
 		$bounce_subs_total = $subscribers+$bouncers;
 		$bounce_percentage = $bounce_subs_total==0 ? round($bouncers * 100, 2) : round($bouncers / ($bounce_subs_total) * 100, 2);
 		return $bounce_percentage;

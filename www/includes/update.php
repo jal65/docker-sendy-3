@@ -1,10 +1,10 @@
-<?php 
+<?php 	
 	//================= Version 1.0.1 =================//
 	//New column in table: campaigns, named wysiwyg
 	//=================================================//
 	$q = "SHOW COLUMNS FROM campaigns WHERE Field = 'wysiwyg'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table campaigns add column wysiwyg INT (11) DEFAULT \'0\'';
 	    $r = mysqli_query($mysqli, $q);
@@ -19,7 +19,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM login WHERE Field = 'tied_to' || Field = 'app' || Field = 'paypal'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table login add (tied_to INT (11), app INT (11), paypal VARCHAR (100))';
 	    $r = mysqli_query($mysqli, $q);
@@ -30,7 +30,7 @@
 	//-------------------------------------------------//
 	$q = "SHOW COLUMNS FROM apps WHERE Field = 'currency' || Field = 'delivery_fee' || Field = 'cost_per_recipient'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table apps add (currency VARCHAR (100), delivery_fee VARCHAR (100), cost_per_recipient VARCHAR (100))';
 	    $r = mysqli_query($mysqli, $q);
@@ -41,7 +41,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM campaigns WHERE Field = 'send_date' || Field = 'lists' || Field = 'timezone'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table campaigns add (send_date VARCHAR (100), lists VARCHAR (100), timezone VARCHAR (100))';
 	    $r = mysqli_query($mysqli, $q);
@@ -52,7 +52,7 @@
 	//-------------------------------------------------//
 	$q = "SHOW COLUMNS FROM login WHERE Field = 'cron'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table login add (cron INT (11) default 0)';
 	    $r = mysqli_query($mysqli, $q);
@@ -63,7 +63,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM lists WHERE Field = 'opt_in' || Field = 'subscribed_url' || Field = 'unsubscribed_url' || Field = 'thankyou' || Field = 'thankyou_subject' || Field = 'thankyou_message' || Field = 'goodbye' || Field = 'goodbye_subject' || Field = 'goodbye_message' || Field = 'unsubscribe_all_list'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table lists add (opt_in INT (11) DEFAULT \'0\', subscribed_url VARCHAR (100), unsubscribed_url VARCHAR (100), thankyou int (11) DEFAULT \'0\', thankyou_subject VARCHAR(100), thankyou_message MEDIUMTEXT, goodbye INT (11) DEFAULT \'0\', goodbye_subject VARCHAR(100), goodbye_message MEDIUMTEXT, unsubscribe_all_list INT (11) DEFAULT \'1\')';
 	    $r = mysqli_query($mysqli, $q);
@@ -74,7 +74,7 @@
 	//-------------------------------------------------//
 	$q = "SHOW COLUMNS FROM subscribers WHERE Field = 'confirmed'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table subscribers add (confirmed INT (11) default 1)';
 	    $r = mysqli_query($mysqli, $q);
@@ -86,7 +86,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM campaigns WHERE Field = 'to_send' || Field = 'to_send_lists'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table campaigns ADD COLUMN to_send INT (100) AFTER sent';
 	    $q2 = 'alter table campaigns ADD COLUMN to_send_lists VARCHAR (100) AFTER to_send';
@@ -99,7 +99,7 @@
 	//-------------------------------------------------//
 	$q = "SHOW COLUMNS FROM lists WHERE Field = 'confirm_url'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table lists ADD COLUMN confirm_url VARCHAR (100) AFTER opt_in';
 	    $r = mysqli_query($mysqli, $q);
@@ -111,7 +111,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM subscribers WHERE Field = 'complaint'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table subscribers ADD COLUMN complaint INT (11) DEFAULT \'0\' AFTER bounced';
 	    $r = mysqli_query($mysqli, $q);
@@ -123,7 +123,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM lists WHERE Field = 'custom_fields'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table lists ADD COLUMN custom_fields MEDIUMTEXT';
 	    $q2 = 'alter table subscribers ADD COLUMN custom_fields LONGTEXT AFTER email';
@@ -139,7 +139,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM subscribers WHERE Field = 'bounce_soft'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table subscribers ADD COLUMN bounce_soft INT (11) DEFAULT \'0\' AFTER bounced, ADD COLUMN last_ares INT (11) AFTER last_campaign';
 	    $q2 = 'alter table login ADD COLUMN cron_ares INT (11) DEFAULT \'0\' AFTER cron';
@@ -151,7 +151,7 @@
 		  `list` int(11) DEFAULT NULL,
 		  `custom_field` varchar(100) DEFAULT NULL,
 		  PRIMARY KEY (`id`)
-		) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;';
+		) AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;';
 		$q5 = 'CREATE TABLE `ares_emails` (
 		  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
 		  `ares_id` int(11) DEFAULT NULL,
@@ -168,7 +168,7 @@
 		  `opens` longtext,
 		  `wysiwyg` int(11) DEFAULT 0,
 		  PRIMARY KEY (`id`)
-		) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;';
+		) AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;';
 	    $r = mysqli_query($mysqli, $q);
 	    $r2 = mysqli_query($mysqli, $q2);
 	    $r3 = mysqli_query($mysqli, $q3);
@@ -182,7 +182,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM login WHERE Field = 'send_rate'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table login ADD COLUMN send_rate INT (100) DEFAULT 0';
 	    $q2 = 'alter table login ADD COLUMN timezone VARCHAR (100)';
@@ -220,7 +220,7 @@
 		  `campaign_id` int(11) DEFAULT NULL,
 		  `subscriber_id` int(11) DEFAULT NULL,
 		  PRIMARY KEY (`id`)
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+		) DEFAULT CHARSET=utf8;';
 		mysqli_query($mysqli, $q2);
     }
     
@@ -229,7 +229,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM campaigns WHERE Field = 'errors'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table campaigns ADD COLUMN errors LONGTEXT';
 	    $r = mysqli_query($mysqli, $q);
@@ -241,7 +241,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM queue WHERE Field = 'sent'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table queue ADD COLUMN sent INT (11) DEFAULT 0';
 	    $r = mysqli_query($mysqli, $q);
@@ -253,7 +253,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM lists WHERE Field = 'confirmation_email'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table lists ADD COLUMN confirmation_email MEDIUMTEXT after goodbye_message';
 	    $r = mysqli_query($mysqli, $q);
@@ -261,7 +261,7 @@
 	}
 	$q = "SHOW COLUMNS FROM lists WHERE Field = 'confirmation_subject'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table lists ADD COLUMN confirmation_subject MEDIUMTEXT after goodbye_message';
 	    $r = mysqli_query($mysqli, $q);
@@ -273,7 +273,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM campaigns WHERE Field = 'bounce_setup'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q = 'alter table login ADD language VARCHAR (100) DEFAULT "en_US", ADD cron_csv INT (11) DEFAULT 0';
 	    $q2 = 'alter table lists ADD prev_count INT (100) DEFAULT 0 after custom_fields, ADD currently_processing INT (100) DEFAULT 0, ADD total_records INT (100) DEFAULT 0';
@@ -287,7 +287,7 @@
 	//add index to list column in subscribers table
 	$q = 'SHOW INDEX FROM subscribers WHERE KEY_NAME = "s_list"';
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 		mysqli_query($mysqli, 'CREATE INDEX s_list ON subscribers (list)');
 		mysqli_query($mysqli, 'CREATE INDEX s_unsubscribed ON subscribers (unsubscribed)');
@@ -305,7 +305,7 @@
 	//=================================================//
 	$q = "SHOW COLUMNS FROM apps WHERE Field = 'app_key'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $q3 = 'alter table apps ADD COLUMN app_key VARCHAR (100)';
 	    $r3 = mysqli_query($mysqli, $q3);
@@ -332,7 +332,7 @@
 	//add index to email column in subscribers table
 	$q = 'SHOW INDEX FROM subscribers WHERE KEY_NAME = "s_email"';
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 		mysqli_query($mysqli, 'CREATE INDEX s_email ON subscribers (email)');
 	}
@@ -343,7 +343,7 @@
 	//Create new 'ses_endpoint' in 'login' table
 	$q = "SHOW COLUMNS FROM login WHERE Field = 'ses_endpoint'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    $r2 = mysqli_query($mysqli, 'alter table login ADD COLUMN ses_endpoint VARCHAR (100)');
 	    if($r2)
@@ -359,7 +359,7 @@
 	//add index to email column in subscribers table
 	$q = 'SHOW COLUMNS FROM campaigns WHERE Field = "to_send_lists" AND Type = "VARCHAR(100)"';
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 1)
+	if (!$r || mysqli_num_rows($r) == 1)
 	{
 		mysqli_query($mysqli, 'ALTER TABLE campaigns MODIFY COLUMN to_send_lists TEXT');
 		mysqli_query($mysqli, 'ALTER TABLE campaigns MODIFY COLUMN lists TEXT');
@@ -371,7 +371,7 @@
 	//Create new 'ses_endpoint' in 'login' table
 	$q = "SHOW COLUMNS FROM apps WHERE Field = 'allocated_quota'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    mysqli_query($mysqli, 'alter table apps ADD COLUMN allocated_quota INT (11) DEFAULT -1');
 	    mysqli_query($mysqli, 'alter table apps ADD COLUMN current_quota INT (11) DEFAULT 0');
@@ -385,7 +385,7 @@
 	//Create new 'test_email' in 'login' table
 	$q = "SHOW COLUMNS FROM apps WHERE Field = 'test_email'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    mysqli_query($mysqli, 'alter table apps ADD COLUMN test_email VARCHAR (100)');
 	}
@@ -396,7 +396,7 @@
 	//Create new 'test_email' in 'login' table
 	$q = "SHOW COLUMNS FROM subscribers WHERE Field = 'messageID'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    mysqli_query($mysqli, 'alter table subscribers ADD COLUMN messageID VARCHAR (100)');
 	}
@@ -412,13 +412,13 @@
 	  `template_name` varchar(100) DEFAULT NULL,
 	  `html_text` mediumtext,
 	  PRIMARY KEY (`id`)
-	) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
+	) AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
 	mysqli_query($mysqli, $q);
 	
 	//Create new 'query_string' in 'campaigns' table
 	$q = "SHOW COLUMNS FROM campaigns WHERE Field = 'query_string'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    mysqli_query($mysqli, 'alter table campaigns ADD COLUMN query_string VARCHAR (500) AFTER html_text, ADD COLUMN label VARCHAR (500) AFTER title');
 	    mysqli_query($mysqli, 'alter table ares_emails ADD COLUMN query_string VARCHAR (500) AFTER html_text');
@@ -431,7 +431,7 @@
 	//Create new 'allowed_attachments' in 'apps' table
 	$q = "SHOW COLUMNS FROM apps WHERE Field = 'allowed_attachments'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    mysqli_query($mysqli, 'alter table apps ADD COLUMN allowed_attachments VARCHAR (100) DEFAULT "jpeg,jpg,gif,png,pdf,zip"');
 	}
@@ -442,7 +442,7 @@
 	//Create new 'allowed_attachments' in 'apps' table
 	$q = "SHOW INDEX FROM subscribers WHERE Key_name = 's_last_campaign'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    mysqli_query($mysqli, 'ALTER TABLE subscribers ADD INDEX s_last_campaign (last_campaign DESC)');
 	    mysqli_query($mysqli, 'ALTER TABLE links modify link VARCHAR(1500)');
@@ -460,10 +460,10 @@
 	//Create new 'allowed_attachments' in 'apps' table
 	$q = "SHOW COLUMNS FROM login WHERE Field = 'auth_enabled'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
-	    mysqli_query($mysqli, 'alter table login ADD COLUMN auth_enabled INT (11) DEFAULT 0');
-	    mysqli_query($mysqli, 'alter table login ADD COLUMN auth_key VARCHAR (100)');
+	    mysqli_query($mysqli, 'ALTER TABLE login ADD COLUMN auth_enabled INT (11) DEFAULT 0');
+	    mysqli_query($mysqli, 'ALTER TABLE login ADD COLUMN auth_key VARCHAR (100)');
 	}
 	
 	//================= Version 2.1.1 ===============//
@@ -478,7 +478,7 @@
 	  `list` int(11) DEFAULT NULL,
 	  `app` int(11) DEFAULT NULL,
 	  PRIMARY KEY (`id`)
-	) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
+	) AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;";
 	mysqli_query($mysqli, $q);
 	
 	//================= Version 2.1.1.5 ===============//
@@ -488,7 +488,7 @@
 	//Create new 'reports_only' in 'apps' table
 	$q = "SHOW COLUMNS FROM apps WHERE Field = 'reports_only'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    mysqli_query($mysqli, 'ALTER TABLE apps ADD COLUMN reports_only INT (1) DEFAULT 0');
 	    mysqli_query($mysqli, 'ALTER TABLE campaigns ADD COLUMN opens_tracking INT (1) DEFAULT \'1\', ADD COLUMN links_tracking INT (1) DEFAULT \'1\'');
@@ -503,7 +503,7 @@
 	//Create new 'reports_only' in 'apps' table
 	$q = "SHOW COLUMNS FROM apps WHERE Field = 'year_of_next_reset'";
 	$r = mysqli_query($mysqli, $q);
-	if (mysqli_num_rows($r) == 0)
+	if (!$r || mysqli_num_rows($r) == 0)
 	{
 	    mysqli_query($mysqli, 'ALTER TABLE apps ADD COLUMN year_of_next_reset VARCHAR (4) AFTER month_of_next_reset');
 	    mysqli_query($mysqli, 'ALTER TABLE campaigns ADD COLUMN quota_deducted INT (11) AFTER wysiwyg');
@@ -535,5 +535,76 @@
 	    		}
 	        }  
 	    }
+	}
+	
+	//================= Version 3.0 ===============//
+	//New column in table: lists_excl
+	//=================================================//
+	//Create new 'allowed_attachments' in 'apps' table
+	$q = "SHOW COLUMNS FROM campaigns WHERE Field = 'lists_excl'";
+	$r = mysqli_query($mysqli, $q);
+	if (mysqli_num_rows($r) == 0)
+	{
+	    mysqli_query($mysqli, 'ALTER TABLE campaigns ADD COLUMN lists_excl MEDIUMTEXT AFTER lists, ADD COLUMN segs MEDIUMTEXT AFTER lists_excl, ADD COLUMN segs_excl MEDIUMTEXT AFTER segs');
+	    mysqli_query($mysqli, 'CREATE TABLE IF NOT EXISTS `seg` (
+		  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+		  `name` varchar(100) DEFAULT NULL,
+		  `app` int(11) DEFAULT NULL,
+		  `list` int(11) DEFAULT NULL,
+		  `last_updated` varchar(100) DEFAULT NULL,
+		  PRIMARY KEY (`id`)
+		) AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;');
+		mysqli_query($mysqli, 'CREATE TABLE IF NOT EXISTS `seg_cons` (
+		  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+		  `seg_id` int(11) DEFAULT NULL,
+		  `grouping` int(11) DEFAULT NULL,
+		  `operator` char(3) DEFAULT NULL,
+		  `field` varchar(100) DEFAULT NULL,
+		  `comparison` varchar(11) DEFAULT NULL,
+		  `val` varchar(500) DEFAULT NULL,
+		  PRIMARY KEY (`id`)
+		) AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;');
+		mysqli_query($mysqli, 'CREATE TABLE `subscribers_seg` (
+		  `seg_id` int(11) DEFAULT NULL,
+		  `subscriber_id` int(11) DEFAULT NULL
+		) DEFAULT CHARSET=utf8;');
+		mysqli_query($mysqli, 'CREATE INDEX s_sid ON subscribers_seg (seg_id)');
+		mysqli_query($mysqli, 'CREATE INDEX s_subscriber_id ON subscribers_seg (subscriber_id)');
+		mysqli_query($mysqli, 'CREATE INDEX s_list ON seg (list)');
+		mysqli_query($mysqli, 'CREATE INDEX s_seg_id ON seg_cons (seg_id)');
+		mysqli_query($mysqli, 'ALTER TABLE subscribers ADD INDEX s_messageid (messageID)');
+	    mysqli_query($mysqli, 'ALTER TABLE queue ADD INDEX s_campaign_id (campaign_id)');
+	    mysqli_query($mysqli, 'ALTER TABLE login ADD COLUMN cron_seg INT (11) DEFAULT \'0\' AFTER cron_csv');
+	    
+	    if(mysqli_query($mysqli, 'ALTER TABLE apps ADD COLUMN campaigns_only INT (1) DEFAULT 0, ADD COLUMN templates_only INT (1) DEFAULT 0, ADD COLUMN lists_only INT (1) DEFAULT 0'))
+	    {
+		    $q2 = 'SELECT id, reports_only FROM apps';
+		    $r2 = mysqli_query($mysqli, $q2);
+		    if ($r2 && mysqli_num_rows($r2) > 0)
+		    {
+		        while($row = mysqli_fetch_array($r2))
+		        {
+			        $aid = $row['id'];
+		    		$ro = $row['reports_only'];
+		    		if($ro==1)
+		    		{
+			    		mysqli_query($mysqli, 'UPDATE apps SET reports_only = 0, campaigns_only = 1, templates_only = 1, lists_only = 1 WHERE id = '.$aid);
+		    		}
+		        }  
+		    }
+	    }
+	}
+	
+	//================= Version 3.0.4 ===============//
+	//New column in table: ares_emails
+	//=================================================//
+	//Create new 'allowed_attachments' in 'apps' table
+	$q = "SHOW COLUMNS FROM ares_emails WHERE Field = 'enabled'";
+	$r = mysqli_query($mysqli, $q);
+	if (mysqli_num_rows($r) == 0)
+	{
+	    mysqli_query($mysqli, 'ALTER TABLE ares_emails ADD COLUMN enabled INT (11) DEFAULT \'0\' AFTER links_tracking');
+	    mysqli_query($mysqli, 'UPDATE ares_emails SET enabled = 1');
+	    mysqli_query($mysqli, 'ALTER TABLE subscribers_seg ADD PRIMARY KEY(seg_id, subscriber_id)');
 	}
 ?>

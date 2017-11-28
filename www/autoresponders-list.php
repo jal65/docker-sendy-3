@@ -123,7 +123,13 @@
 	    
 	    <?php else: ?>
 				  
-	    <div class="alert alert-info"><?php echo _('All autoresponders have been created.');?></div>
+	    <div class="alert alert-info">
+		    <h3><?php echo _('All types of autoresponders have been created');?></h3><br/>
+		    <ul>
+			    <li><?php echo _('You can create more emails in each type of autoresponder that you have previously created below.');?></li>
+			    <li><?php echo _('To create more \'Send annually\' and \'Send on date\' autoresponders, add more \'Date based\' custom fields to this list.');?></li>
+			</ul>
+		</div>
 				  
 	    <?php endif;?>
 	    

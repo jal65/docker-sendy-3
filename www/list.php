@@ -10,6 +10,15 @@
 			echo '<script type="text/javascript">window.location="'.addslashes(get_app_info('path')).'/list?i='.get_app_info('restricted_to_app').'"</script>';
 			exit;
 		}
+		else if(get_app_info('campaigns_only')==1 && get_app_info('templates_only')==1 && get_app_info('lists_only')==1 && get_app_info('reports_only')==1)
+		{
+			echo '<script type="text/javascript">window.location="'.addslashes(get_app_info('path')).'/logout"</script>';
+			exit;
+		}
+		else if(get_app_info('lists_only')==1)
+		{
+			go_to_next_allowed_section();
+		}
 	}
 ?>
 <link href="<?php echo get_app_info('path');?>/js/tablesorter/theme.default.min.css" rel="stylesheet">

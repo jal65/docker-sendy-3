@@ -41,7 +41,8 @@
 	
 	$email_id = short(mysqli_real_escape_string($mysqli, $_GET['e']), true);
 	$list_id = short(mysqli_real_escape_string($mysqli, $_GET['l']), true);
-	$join_date = round(time()/60)*60;
+	$time = time();
+	$join_date = round($time/60)*60;
 	
 	//Set language
 	$q = 'SELECT login.language FROM lists, login WHERE lists.id = '.$list_id.' AND login.app = lists.app';
@@ -49,7 +50,7 @@
 	if ($r && mysqli_num_rows($r) > 0) while($row = mysqli_fetch_array($r)) $language = $row['language'];
 	set_locale($language);
 	
-	$q = 'UPDATE subscribers SET confirmed = 1, join_date = CASE WHEN join_date IS NULL THEN '.$join_date.' ELSE join_date END WHERE id = '.$email_id.' AND list = '.$list_id;
+	$q = 'UPDATE subscribers SET confirmed = 1, timestamp = "'.$time.'", join_date = CASE WHEN join_date IS NULL THEN '.$join_date.' ELSE join_date END WHERE id = '.$email_id.' AND list = '.$list_id;
 	$r = mysqli_query($mysqli, $q);
 	if ($r){
 		//get thank you message etc

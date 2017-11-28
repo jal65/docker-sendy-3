@@ -22,7 +22,10 @@
 	$login_email = mysqli_real_escape_string($mysqli, $_POST['login_email']);
 	$language = mysqli_real_escape_string($mysqli, $_POST['language']);
 	$choose_limit = mysqli_real_escape_string($mysqli, $_POST['choose-limit']);
-	$reports = mysqli_real_escape_string($mysqli, $_POST['reports']);
+	$campaigns = isset($_POST['campaigns']) ? 0 : 1;
+	$templates = isset($_POST['templates']) ? 0 : 1;
+	$lists = isset($_POST['lists-subscribers']) ? 0 : 1;
+	$reports = isset($_POST['reports']) ? 0 : 1;
 	if($choose_limit=='custom')
 	{
 		$reset_on_day = mysqli_real_escape_string($mysqli, $_POST['reset-on-day']);
@@ -58,9 +61,9 @@
 	//------------------------------------------------------//
 	
 	if($smtp_password=='')
-		$q = 'UPDATE apps SET app_name = "'.$app_name.'", from_name = "'.$from_name.'", from_email = "'.$from_email.'", reply_to = "'.$reply_to.'", allowed_attachments = "'.$allowed_attachments.'", currency = "'.$currency.'", delivery_fee = "'.$delivery_fee.'", cost_per_recipient = "'.$cost_per_recipient.'", smtp_host = "'.$smtp_host.'", smtp_port = "'.$smtp_port.'", smtp_ssl = "'.$smtp_ssl.'", smtp_username = "'.$smtp_username.'", allocated_quota = "'.$monthly_limit.'", day_of_reset = "'.$reset_on_day.'" '.$month_of_next_reset.' '.$current_limit.', reports_only = '.$reports.' WHERE id = '.$id.' AND userID = '.get_app_info('userID');
+		$q = 'UPDATE apps SET app_name = "'.$app_name.'", from_name = "'.$from_name.'", from_email = "'.$from_email.'", reply_to = "'.$reply_to.'", allowed_attachments = "'.$allowed_attachments.'", currency = "'.$currency.'", delivery_fee = "'.$delivery_fee.'", cost_per_recipient = "'.$cost_per_recipient.'", smtp_host = "'.$smtp_host.'", smtp_port = "'.$smtp_port.'", smtp_ssl = "'.$smtp_ssl.'", smtp_username = "'.$smtp_username.'", allocated_quota = "'.$monthly_limit.'", day_of_reset = "'.$reset_on_day.'" '.$month_of_next_reset.' '.$current_limit.', campaigns_only = '.$campaigns.', templates_only = '.$templates.', lists_only = '.$lists.', reports_only = '.$reports.' WHERE id = '.$id.' AND userID = '.get_app_info('userID');
 	else
-		$q = 'UPDATE apps SET app_name = "'.$app_name.'", from_name = "'.$from_name.'", from_email = "'.$from_email.'", reply_to = "'.$reply_to.'", allowed_attachments = "'.$allowed_attachments.'", currency = "'.$currency.'", delivery_fee = "'.$delivery_fee.'", cost_per_recipient = "'.$cost_per_recipient.'", smtp_host = "'.$smtp_host.'", smtp_port = "'.$smtp_port.'", smtp_ssl = "'.$smtp_ssl.'", smtp_username = "'.$smtp_username.'", smtp_password = "'.$smtp_password.'", allocated_quota = "'.$monthly_limit.'", day_of_reset = "'.$reset_on_day.'" '.$month_of_next_reset.' '.$current_limit.', reports_only = '.$reports.' WHERE id = '.$id.' AND userID = '.get_app_info('userID');
+		$q = 'UPDATE apps SET app_name = "'.$app_name.'", from_name = "'.$from_name.'", from_email = "'.$from_email.'", reply_to = "'.$reply_to.'", allowed_attachments = "'.$allowed_attachments.'", currency = "'.$currency.'", delivery_fee = "'.$delivery_fee.'", cost_per_recipient = "'.$cost_per_recipient.'", smtp_host = "'.$smtp_host.'", smtp_port = "'.$smtp_port.'", smtp_ssl = "'.$smtp_ssl.'", smtp_username = "'.$smtp_username.'", smtp_password = "'.$smtp_password.'", allocated_quota = "'.$monthly_limit.'", day_of_reset = "'.$reset_on_day.'" '.$month_of_next_reset.' '.$current_limit.', campaigns_only = '.$campaigns.', templates_only = '.$templates.', lists_only = '.$lists.', reports_only = '.$reports.' WHERE id = '.$id.' AND userID = '.get_app_info('userID');
 	$r = mysqli_query($mysqli, $q);
 	if ($r)
 	{

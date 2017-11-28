@@ -51,13 +51,13 @@
 	    
 	    <br/><br/>
 	    
-	    <a href="<?php echo get_app_info('path')?>/autoresponders-create?i=<?php echo get_app_info('app')?>&a=<?php echo $aid?>" title="" class="btn"><i class="icon icon-plus"></i> <?php echo _('Add a new email to this autoresponder');?></a>
+	    <a href="<?php echo get_app_info('path')?>/autoresponders-create?i=<?php echo get_app_info('app')?>&a=<?php echo $aid?>" title="" class="btn btn-inverse"><i class="icon icon-plus"></i> <?php echo _('Add a new email to this autoresponder');?></a>
 	    
 	    <br/><br/>
 	    
 	    <div class="row-fluid">
 	    	<div class="span12 ares">
-				<table class="table ares-email-table table-striped responsive">
+				<table class="table ares-email-table responsive">
 		          <thead>
 		            <tr>
 		              <th><?php echo _('Send');?></th>
@@ -65,6 +65,7 @@
 		              <th><?php echo _('Sent');?></th>
 		              <th><?php echo _('Unique Opens');?></th>
 		              <th><?php echo _('Unique Clicks');?></th>
+		              <th><?php echo _('Enabled');?></th>
 		            </tr>
 		          </thead>
 		          <tbody>
@@ -81,6 +82,7 @@
 			          			$recipients = $row['recipients'];
 			          			$opens = $row['opens'];
 			          			$from_email = $row['from_email'];
+			          			$enabled = $row['enabled'];
 			          			
 			          			//opens
 			          			if($opens=='')
@@ -182,8 +184,8 @@
 								$title = str_replace($unconverted_date, $converted_date, $title);
 		          	?>
 		          	<tr id="email-<?php echo $ares_email_id;?>">
-			          <td><?php echo $time_condition;?></td>
-		              <td>
+			          <td class="cols"><?php echo $time_condition;?></td>
+		              <td class="cols">
 		              	<strong><?php echo $title;?></strong><br/>
 		              	<div class="btns">
 		              	
@@ -217,9 +219,72 @@
 				            </script>
 				        </div>
 		              </td>
-		              <td><?php echo $recipients;?></td>
-		              <td><span class="label"><?php if(get_saved_data('opens_tracking', $ares_email_id)): ?><?php echo $percentage_opened;?>%</span> <?php echo number_format($opens_unique);?> <?php echo _('opened');?><?php else: ?><?php echo _('Tracking disabled'); endif;?></td>
-		              <td><span class="label"><?php if(get_saved_data('links_tracking', $ares_email_id)): ?><?php echo $percentage_clicked;?>%</span> <?php echo number_format(get_click_percentage($ares_email_id));?> <?php echo _('clicked');?><?php else: ?><?php echo _('Tracking disabled'); endif;?></td>
+		              <td class="cols"><?php echo $recipients;?></td>
+		              <td class="cols"><span class="label"><?php if(get_saved_data('opens_tracking', $ares_email_id)): ?><?php echo $percentage_opened;?>%</span> <?php echo number_format($opens_unique);?> <?php echo _('opened');?><?php else: ?><?php echo _('Tracking disabled'); endif;?></td>
+		              <td class="cols"><span class="label"><?php if(get_saved_data('links_tracking', $ares_email_id)): ?><?php echo $percentage_clicked;?>%</span> <?php echo number_format(get_click_percentage($ares_email_id));?> <?php echo _('clicked');?><?php else: ?><?php echo _('Tracking disabled'); endif;?></td>
+		              <td>
+						<div class="btn-group" data-toggle="buttons-radio">
+							<a href="javascript:void(0)" title="" class="btn" id="enabled-<?php echo $ares_email_id;?>" style="text-decoration: none;"><i></i> <?php echo _('Yes');?></a>
+							<a href="javascript:void(0)" title="" class="btn" id="disabled-<?php echo $ares_email_id;?>" style="text-decoration: none;"><i></i> <?php echo _('No');?></a>
+						</div>
+						<script type="text/javascript">
+							$(document).ready(function() {
+								<?php if($enabled): ?>
+									$("#enabled-<?php echo $ares_email_id;?>").button('toggle');
+									$("#enabled-<?php echo $ares_email_id;?> i").addClass("icon icon-circle");
+									$("#disabled-<?php echo $ares_email_id;?> i").addClass("icon icon-circle-blank");
+								<?php else: ?>
+									$("#email-<?php echo $ares_email_id;?> .cols").css("opacity", "0.3");
+									$("#disabled-<?php echo $ares_email_id;?>").button('toggle');
+									$("#disabled-<?php echo $ares_email_id;?> i").addClass("icon icon-circle");
+									$("#enabled-<?php echo $ares_email_id;?> i").addClass("icon icon-circle-blank");
+								<?php endif;?>
+								
+								$("#enabled-<?php echo $ares_email_id;?>").click(function(){
+									$(this).attr("disabled", true);
+									$.post("<?php echo get_app_info('path')?>/includes/ares/toggle-autoresponder.php", { ares_id: <?php echo $ares_email_id;?>, enable: 1 },
+									  function(data) {
+									      if(data)
+									      {
+										      if(data=='success')
+										      {
+											      $("#enabled-<?php echo $ares_email_id;?>").removeAttr("disabled");
+											      $("#enabled-<?php echo $ares_email_id;?>").button('toggle');
+											      $("#enabled-<?php echo $ares_email_id;?> i").removeClass("icon icon-circle-blank");
+											      $("#enabled-<?php echo $ares_email_id;?> i").addClass("icon icon-circle");
+											      $("#disabled-<?php echo $ares_email_id;?> i").removeClass("icon icon-circle");
+											      $("#disabled-<?php echo $ares_email_id;?> i").addClass("icon icon-circle-blank");
+											      $("#email-<?php echo $ares_email_id;?> .cols").css("opacity", "1");
+										      }
+										      else if(data=='failed') alert("Sorry, unable to save. Please try again later!");
+										  } 
+									  }
+									);
+								});
+								$("#disabled-<?php echo $ares_email_id;?>").click(function(){
+									$(this).attr("disabled", true);
+									$.post("<?php echo get_app_info('path')?>/includes/ares/toggle-autoresponder.php", { ares_id: <?php echo $ares_email_id;?>, enable: 0 },
+									  function(data) {
+									      if(data)
+									      {
+										      if(data=='success')
+										      {
+											      $("#disabled-<?php echo $ares_email_id;?>").removeAttr("disabled");
+											      $("#disabled-<?php echo $ares_email_id;?>").button('toggle');
+											      $("#disabled-<?php echo $ares_email_id;?> i").removeClass("icon icon-circle-blank");
+											      $("#disabled-<?php echo $ares_email_id;?> i").addClass("icon icon-circle");
+											      $("#enabled-<?php echo $ares_email_id;?> i").removeClass("icon icon-circle");
+											      $("#enabled-<?php echo $ares_email_id;?> i").addClass("icon icon-circle-blank");
+											      $("#email-<?php echo $ares_email_id;?> .cols").css("opacity", "0.3");
+										      }
+										      else if(data=='failed') alert("Sorry, unable to save. Please try again later!");
+										  } 
+									  }
+									);
+								});
+							});
+						</script>
+		              </td>
 		            </tr>
 		            <?php 
 				            }  

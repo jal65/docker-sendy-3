@@ -66,20 +66,31 @@
 		
 		//check if email needs to be decrypted
 		$validator = new EmailAddressValidator;
-		if (!$validator->check_email_address($email)) $email = short($email, true);
-		
-		//check if email is valid
-		$validator = new EmailAddressValidator;
-		if ($validator->check_email_address($email)) {}
-		else
+		if ($validator->check_email_address($email)) 
 		{
 			if($return_boolean=='true')
 			{
 				echo 'Invalid email address.';
 				exit;
 			}
+			else $feedback = _('Email address is invalid.');
+		}
+		else
+		{
+			$email = short($email, true);
+			
+			//check if email is valid
+			$validator = new EmailAddressValidator;
+			if ($validator->check_email_address($email)) {}
 			else
-			    $feedback = _('Email address is invalid.');
+			{
+				if($return_boolean=='true')
+				{
+					echo 'Invalid email address.';
+					exit;
+				}
+				else $feedback = _('Email address is invalid.');
+			}
 		}
 	}
 	else if(isset($_POST['email']))//email posted from subscribe form or API
@@ -89,7 +100,7 @@
 		$name = strip_tags(mysqli_real_escape_string($mysqli, $_POST['name'])); //optional
 		$list_id = strip_tags(short(mysqli_real_escape_string($mysqli, $_POST['list']), true)); //compulsory
 		$return_boolean = strip_tags(mysqli_real_escape_string($mysqli, $_POST['boolean'])); //compulsory
-		$ignore_opt_in = strip_tags(mysqli_real_escape_string($mysqli, $_POST['ignore_opt_in'])); //optional
+		$hp = strip_tags(mysqli_real_escape_string($mysqli, $_POST['hp'])); //honeypot
 		
 		//Set language
 		$q = 'SELECT login.language FROM lists, login WHERE lists.id = '.$list_id.' AND login.app = lists.app';
@@ -112,8 +123,7 @@
 		{
 			//check if email is valid
 			$validator = new EmailAddressValidator;
-			if ($validator->check_email_address($email)) {}
-			else
+			if (!$validator->check_email_address($email) || $hp!='')
 			{
 				if($return_boolean=='true')
 				{
@@ -147,11 +157,6 @@
 				$thankyou_message = stripslashes($row['thankyou_message']);
 				$custom_fields = $row['custom_fields'];
 		    }
-
-		    if( isset($ignore_opt_in) && ($ignore_opt_in == 'true') )
-		    {
-				$opt_in = 0;
-			}
 			
 		    //get custom fields list and format it for db insert
 		    $cf_vals = '';
@@ -164,7 +169,17 @@
 					//if custom field matches POST data but IS NOT name, email, list or submit
 					if(str_replace(' ', '', $cf_array[0])==$key && ($key!='name' && $key!='email' && $key!='list' && $key!='submit'))
 					{
-						$cf_vals .= addslashes($value);
+						//if custom field format is Date
+						if($cf_array[1]=='Date')
+						{
+							$date_value1 = strtotime($value);
+							$date_value2 = strftime("%b %d, %Y 12am", $date_value1);
+							$value = strtotime($date_value2);
+							$cf_vals .= $value;
+						}
+						//else if custom field format is Text
+						else
+							$cf_vals .= addslashes($value);
 					}
 				}
 				$cf_vals .= '%s%';
@@ -172,7 +187,7 @@
 		}
 		
 		//check if user is in this list
-		$q = 'SELECT id, userID, custom_fields, unsubscribed, confirmed FROM subscribers WHERE email = "'.$email.'" AND list = '.$list_id;
+		$q = 'SELECT id, userID, custom_fields, unsubscribed, confirmed, bounced, complaint FROM subscribers WHERE email = "'.$email.'" AND list = '.$list_id;
 		$r = mysqli_query($mysqli, $q);
 		if ($r && mysqli_num_rows($r) > 0)
 		{
@@ -183,6 +198,8 @@
 				$custom_values = $row['custom_fields'];
 				$unsubscribed = $row['unsubscribed'];
 				$confirmed = $row['confirmed'];
+				$bounced = $row['bounced'];
+				$complaint = $row['complaint'];
 		    } 
 		    
 		    //get custom fields values
@@ -208,14 +225,9 @@
 							//if custom field format is Date
 							if($cf_fields_array[1]=='Date')
 							{
-							    $date_from_string = strtotime($value);
-                                $date_from_timestamp = filter_var($value, FILTER_VALIDATE_INT);
-							    if($date_value1) {
-							        $value = $date_value1;
-							    }
-							    else if($date_from_timestamp !==false) {
-							        $value = $date_from_timestamp;
-							    }
+								$date_value1 = strtotime($value);
+								$date_value2 = strftime("%b %d, %Y 12am", $date_value1);
+								$value = strtotime($date_value2);
 								$cf_value .= $value;
 							}
 							//else if custom field format is Text
@@ -354,7 +366,7 @@
 			}
 			
 			//send confirmation email if list is double opt in
-			if($opt_in && $confirmed!=1)
+			if($opt_in && $confirmed!=1 && $bounced!=1 && $complaint!=1)
 			{			
 				$confirmation_link = APP_PATH.'/confirm?e='.short($subscriber_id).'&l='.short($list_id);
 				

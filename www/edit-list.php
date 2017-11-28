@@ -90,14 +90,20 @@
 			              <input type="text" class="input-xlarge" id="subscribed_url" name="subscribed_url" placeholder="http://" style="width: 98%;" value="<?php echo get_lists_data('subscribed_url', $_GET['l']);?>">
 			            </div>
 			        </div>
-			        <div class="well" style="background: #FFFDEC;">
-			        	<p><?php echo _('You can also pass \'Email\' and \'listID\' data into the \'Subscribe success page\' like so');?>:</p>
+			        <div class="well list-custom-vars">
+			        	<p><?php echo _('You can also pass variables into your custom \'Subscribe success page\' like so');?>:</p>
 			        	<p><?php echo _('Example');?>:<br/><pre>http://domain.com/subscribed.php?name=%n&email=%e&listid=%l</pre></p>
-			        	<p><?php echo _('<code>%n</code> will be converted into the subscriber\'s name. <code>%e</code> will be converted into the \'email\' and <code>%l</code> will be converted into the \'listID\' that subscribed');?>.</p>
+			        	<p>
+				        	<ul>
+					        	<li><?php echo _('<code>%n</code> will be converted into the subscriber\'s name');?></li>
+					        	<li><?php echo _('<code>%e</code> will be converted into the \'email\'');?></li>
+					        	<li><?php echo _('<code>%l</code> will be converted into the \'listID\'');?></li>
+				        	</ul>
+			        	</p>
 		        	</div>
 		        </div>
 		        
-		        <label class="control-label" for="subscribed_url"><strong><?php echo _('Subscription confirmed page');?></strong> (<?php echo _('only applies for double opt-ins');?>)</label>
+		        <label class="control-label" for="subscribed_url"><strong><?php echo _('Subscription confirmed page');?></strong> (<i><?php echo _('only applies for double opt-ins');?></i>)</label>
 		        <div class="well">
 		        	<p><?php echo _('If your List Type is double opt-in, users who clicked the confirmation URL will be sent to a generic confirmation page. To redirect users to a page of your preference, enter the link below.');?></p>
 		        	<label class="control-label" for="confirm_url"><?php echo _('Page URL');?></label>
@@ -106,10 +112,16 @@
 			              <input type="text" class="input-xlarge" id="confirm_url" name="confirm_url" placeholder="http://" style="width: 98%;" value="<?php echo get_lists_data('confirm_url', $_GET['l']);?>">
 			            </div>
 			        </div>
-			        <div class="well" style="background: #FFFDEC;">
-			        	<p><?php echo _('You can also pass \'Email\' and \'listID\' data into the \'Subscription confirmed page\' like so');?>:</p>
+			        <div class="well list-custom-vars">
+			        	<p><?php echo _('You can also pass variables into your custom \'Subscription confirmed page\' like so');?>:</p>
 			        	<p><?php echo _('Example');?>:<br/><pre>http://domain.com/confirmed.php?name=%n&email=%e&listid=%l</pre></p>
-			        	<p><?php echo _('<code>%n</code> will be converted into the subscriber\'s name. <code>%e</code> will be converted into the \'email\' and <code>%l</code> will be converted into the \'listID\' that subscribed');?>.</p>
+			        	<p>
+				        	<ul>
+					        	<li><?php echo _('<code>%n</code> will be converted into the subscriber\'s name');?></li>
+					        	<li><?php echo _('<code>%e</code> will be converted into the \'email\'');?></li>
+					        	<li><?php echo _('<code>%l</code> will be converted into the \'listID\'');?></li>
+				        	</ul>
+				        </p>
 		        	</div>
 		        </div>
 	    	</div>
@@ -144,14 +156,14 @@
 			  
 			  <br/>
 			  
-			  <label class="control-label" for="confirmation_subject"><strong><?php echo _('Confirmation email subject');?></strong> (<?php echo _('only applies for double opt-ins');?>)<br/><em>* <?php echo _('A generic subject line will be used if you leave this field empty.');?></em></label>
+			  <label class="control-label" for="confirmation_subject"><strong><?php echo _('Confirmation email subject');?></strong> (<i><?php echo _('only applies for double opt-ins');?></i>)<br/><em>* <?php echo _('A generic subject line will be used if you leave this field empty.');?></em></label>
 		    	<div class="control-group">
 			    	<div class="controls">
 		              <input type="text" class="input-xlarge" id="confirmation_subject" name="confirmation_subject" placeholder="<?php echo _('Subject of confirmation email');?>" style="width: 98%;" value="<?php echo get_lists_data('confirmation_subject', $_GET['l']);?>">
 		            </div>
 		        </div>
 			    
-			  <label class="control-label" for="confirmation_email"><strong><?php echo _('Double Opt-In confirmation message');?></strong> (<?php echo _('only applies for double opt-ins');?>)<br/><em>* <?php echo _('A generic email message will be used if you leave this field empty.');?></em><br/><em>* <?php echo _('Don\'t forget to include the confirmation link tag');?> </em><code id="confirmation_link_tag">[confirmation_link]</code><em> <?php echo _('somewhere in your message');?></em>.</label>
+			  <label class="control-label" for="confirmation_email"><strong><?php echo _('Double Opt-In confirmation message');?></strong> (<i><?php echo _('only applies for double opt-ins');?></i>)<br/><em>* <?php echo _('A generic email message will be used if you leave this field empty.');?></em><br/><em>* <?php echo _('Don\'t forget to include the confirmation link tag');?> </em><code id="confirmation_link_tag">[confirmation_link]</code><em> <?php echo _('somewhere in your message');?></em>.</label>
 				<script type="text/javascript">
 				$(document).ready(function() {
 					$("#confirmation_link_tag").click(function(){
@@ -224,10 +236,16 @@
 			              <input type="text" class="input-xlarge" id="unsubscribed_url" name="unsubscribed_url" placeholder="http://" style="width: 98%;" value="<?php echo get_lists_data('unsubscribed_url', $_GET['l']);?>">
 			            </div>
 			        </div>
-			        <div class="well" style="background: #FFFDEC;">
-			        	<p><?php echo _('You can also pass \'Email\' and \'listID\' data into the \'Unsubscribe confirmation page\' like so');?>:</p>
-			        	<p><?php echo _('Example');?>:<br/><pre>http://domain.com/unsubscribed.php?email=%e&listid=%l</pre></p>
-			        	<p><?php echo _('<code>%e</code> will be converted into the \'email\' and <code>%l</code> will be converted into the \'listID\' that unsubscribed');?>.</p>
+			        <div class="well list-custom-vars">
+			        	<p><?php echo _('You can also pass variables into your custom \'Unsubscribe confirmation page\' like so');?>:</p>
+			        	<p><?php echo _('Example');?>:<br/><pre>http://domain.com/unsubscribed.php?email=%e&listid=%l&resubscribe_url=%s</pre></p>
+			        	<p>
+				        	<ul>
+					        	<li><?php echo _('<code>%e</code> will be converted into the \'email\'');?></li>
+					        	<li><?php echo _('<code>%l</code> will be converted into the \'listID\'');?></li>
+					        	<li><?php echo _('<code>%s</code> will be converted into the full \'re-subscribe\' URL');?></li>
+				        	</ul>
+				        </p>
 		        	</div>
 		        </div>
 	    	</div>

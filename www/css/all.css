@@ -173,7 +173,7 @@ select, input[type="file"]{
 	font-size: 11px;
 	color: #7f7f7f;
 }
-#campaign-save-only-btn{
+#campaign-save-only-btn, #autoresponder-save-only-btn{
 	position:relative;
 	top: 1px;
 	right: 5px;
@@ -204,4 +204,80 @@ select, input[type="file"]{
 	padding-left: 15px; 
 	color: #818181; 
 	font-size: 12px;
+}
+#email_list option:disabled, #email_list_exclude option:disabled {
+    color: #dddddd;
+}
+.date1, .date2{
+	float: left; 
+	margin-left: 15px;
+}
+.datepicker-label{
+	float:left;
+}
+.datepicker-and{
+	float:left; 
+	margin: 5px 15px 0 0;
+}
+.condition-dropdown{
+	float: left;
+	margin-bottom: 20px;
+}
+.date-condition-dropdown, .text-condition-dropdown{
+	float:left; 
+	margin-left: 15px;
+}
+.text-value{
+	float: left;
+	margin: 1px 0 0px 15px; 
+}
+#and-btn{
+	clear:both;
+	margin-bottom: 20px;
+}
+.or-btn{
+	float: right;
+}
+.delete-btn{
+	float: right;
+	margin: 5px 0 0 15px;
+}
+.or-group{
+	clear: both;
+}
+.group .well{
+	padding-top: 35px;
+}
+.last-update, .seg-note{
+	color:#797979;
+	font-style: italic;
+}
+.export-seg-csv{
+	float: right;
+}
+.list-custom-vars{
+	background: #FFFDEC;
+}
+.dashed-box{
+	padding: 10px 20px;
+	border: 1px dashed #c6c6c6;
+}
+.rounded-dashed-box{
+	border: 1px dashed #eeeeee; 
+	padding: 25px 20px 10px 20px; 
+	-webkit-border-radius: 5px; 
+	-moz-border-radius: 5px; 
+	border-radius: 5px;
+}
+.sidebar-box{
+	background: white;
+	border: 1px solid #f6f6f6; 
+	-webkit-border-radius: 5px; 
+	-moz-border-radius: 5px; 
+	border-radius: 5px;
+}
+.sidebar-box ul li.active a{
+	color: white;
+	text-shadow: none;
+	background: #303030;
 }

@@ -20,6 +20,23 @@
 	$q = 'DELETE FROM ares WHERE list = '.$list_id;
 	mysqli_query($mysqli, $q);
 	
+	//delete segments
+	$q = 'SELECT id FROM seg WHERE list = '.$list_id;
+	$r = mysqli_query($mysqli, $q);
+	if ($r && mysqli_num_rows($r) > 0)
+	{
+	    while($row = mysqli_fetch_array($r))
+	    {
+			$seg_id = $row['id'];
+			
+			$q2 = 'DELETE FROM seg_cons WHERE seg_id = '.$seg_id;
+			mysqli_query($mysqli, $q2);
+	    }  
+	}	
+	//delete segments
+	$q = 'DELETE FROM seg WHERE list = '.$list_id;
+	mysqli_query($mysqli, $q);
+	
 	//delete list and its subscribers
 	$q = 'DELETE FROM lists WHERE id = '.$list_id.' AND userID = '.get_app_info('main_userID');
 	$r = mysqli_query($mysqli, $q);

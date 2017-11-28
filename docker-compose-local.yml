@@ -8,16 +8,18 @@ services:
       - /var/lib/mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: my_passwd
-      MYSQL_DATABASE: sendy_db
+      MYSQL_ROOT_PASSWORD: RiNoLio23
+      MYSQL_DATABASE: emkt_sendy
+      SENDY_BASE_DATA_FILE: emkt_sendy_bkp_20170412_sendy_2128.sql
   sendy:
     build: .
     ports:
-      - 9014:80
+      - 80:80
     links:
       - mysql-sendy:mysql
     environment:
-      MYSQL_ROOT_PASSWORD: my_passwd
-      MYSQL_DATABASE: sendy_db
+      MYSQL_ROOT_PASSWORD: RiNoLio23
+      MYSQL_DATABASE: emkt_sendy
       MYSQL_PORT : 3306
-      SENDY_PATH : http://273293942_sendy.my_domain.com
+      SENDY_PATH : http://m.emkt.eu
+      SENDY_BASE_DATA_FILE: emkt_sendy_bkp_20170412_sendy_2128.sql

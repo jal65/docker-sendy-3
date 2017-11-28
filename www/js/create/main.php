@@ -62,56 +62,162 @@ $(document).ready(function() {
 		}
 	});
 	
+	//init
+	var inlists_array = [];
+	var exlists_array = [];
+	var inlists = 0;
+	var exlists = 0;
+	var recip = 0;
+	
+	function disable_btns()
+	{
+		$("#real-btn").addClass("disabled");
+		$("#real-btn").attr("disabled", "disabled");
+		$("#schedule-btn").addClass("disabled");
+		$("#schedule-btn").attr("disabled", "disabled");
+		$("#pay-btn").addClass("disabled");
+		$("#pay-btn").attr("disabled", "disabled");
+	}
+	
+	function enable_btns()
+	{
+		$("#real-btn").removeClass("disabled");
+		$("#real-btn").removeAttr("disabled");
+		$("#schedule-btn").removeClass("disabled");
+		$("#schedule-btn").removeAttr("disabled");
+		$("#pay-btn").removeClass("disabled");
+		$("#pay-btn").removeAttr("disabled");
+	}
+	
 	//select list count
-	$("select#email_list").change(function () {
-      var recip = 0;
-      $("select#email_list option:selected").each(function () {
-            recip += Number($(this).data('quantity'));
-          });
-      $("#recipients").text(recip);
-      
-      //if user have AWS keys, check quota
-      if($("#aws_keys_available").val()=='true' || $("#is_sub_user").val())
+	$("select#email_list_exclude, select#email_list").change(function () {
+	  
+	  disable_btns();
+	  $("#recipients").html("<img src='<?php echo get_app_info('path');?>/img/loader.gif' style='width: 15px; margin-top: -2px;'/> <?php echo _('Calculating');?>..");
+	  $("#remaining").hide();
+	  var inlists_array = [];
+	  var exlists_array = [];
+	  var inseg_array = [];
+	  var exseg_array = [];
+	  
+	  var inlist_selected = [];	  
+	  var inlist_selected_type = [];	  
+	  var exlist_selected = [];	  
+	  var exlist_selected_type = [];	  
+	  
+	  $("select#email_list_exclude option").each(function(){
+		  $("#excl_"+$(this).val()).removeAttr("disabled");
+		  $("#excl_seg_"+$(this).val()).removeAttr("disabled");
+	  });
+	  $("select#email_list :selected").each(function(i, selected){
+		  inlist_selected[i] = $(selected).val(); 
+		  inlist_selected_type[i] = $(selected).attr("data-is-seg");
+		  
+		  //If selected list is a segment 
+		  if(inlist_selected_type[i] == "yes")
+		  {
+			  inseg_array.push(inlist_selected[i]);
+			  $("#excl_seg_"+inlist_selected[i]).attr("disabled", true);
+			  $("#excl_seg_"+inlist_selected[i]).removeAttr("selected");
+		  }
+		  //Else if selected list is a regular list
+		  else
+		  {
+			  inlists_array.push(inlist_selected[i]);
+			  $("#excl_"+inlist_selected[i]).attr("disabled", true);
+			  $("#excl_"+inlist_selected[i]).removeAttr("selected");
+		  }
+		  		  
+	  });	  
+	  $("select#email_list_exclude :selected").each(function(i, selected){
+		  exlist_selected[i] = $(selected).val(); 
+		  exlist_selected_type[i] = $(selected).attr("data-is-seg");
+		  
+		  //If selected list is a segment 
+		  if(exlist_selected_type[i] == "yes")
+		  {
+			  exseg_array.push(exlist_selected[i]);
+		  }
+		  //Else if selected list is a regular list
+		  else
+		  {
+			  exlists_array.push(exlist_selected[i]);
+		  }
+		  		  
+	  });
+	  
+	  if(inlists_array.length!=0) 
 	  {
-	      //check if user is sending to more than SES allows
-	      if(recip > $("#ses_sends_left").val() && $("#ses_sends_left").val()!='-1')
-	      {
-	      	  $("#over-limit").slideDown("fast");
-		      $("#recipients").css("color", "#FF0000");
-		      $("#recipients").css("font-weight", "bold");
-		      $("#real-btn").addClass("disabled");
-		      $("#real-btn").attr("disabled", "disabled");
-		      $("#schedule-btn").addClass("disabled");
-		      $("#schedule-btn").attr("disabled", "disabled");
-		      $("#pay-btn").addClass("disabled");
-		      $("#pay-btn").attr("disabled", "disabled");
-	      }
-	      else
-	      {
-	          $("#over-limit").slideUp("fast");
-		      $("#recipients").css("color", "#000000");
-		      $("#recipients").css("font-weight", "normal");
-		      $("#real-btn").removeClass("disabled");
-		      $("#real-btn").removeAttr("disabled");
-		      $("#schedule-btn").removeClass("disabled");
-		      $("#schedule-btn").removeAttr("disabled");
-		      $("#pay-btn").removeClass("disabled");
-		      $("#pay-btn").removeAttr("disabled");
-	      }
-	   }
-	   
-	   $("#grand_total").text(
-      	number_format(
-	      	Number($("#delivery_fee").text()) + 
-	      	(Number($("#recipient_fee").text()) * recip)
-      	, 3, '.', ',')
-      );
-      $("#grand_total_val").val(
-      	number_format(
-	      	Number($("#delivery_fee").text()) + 
-	      	(Number($("#recipient_fee").text()) * recip)
-      	, 2, '.', ',')
-      );
+		  inlists = inlists_array.join(",");
+		  $("#in_list").val(inlists);
+	  } 
+      else inlists = 0;
+      if(inseg_array.length!=0) 
+      {
+	      inlists_seg = inseg_array.join(",");
+	      $("#in_list_seg").val(inlists_seg);
+	  }
+      else inlists_seg = 0;
+	  if(exlists_array.length!=0) 
+	  {
+		  exlists = exlists_array.join(",");
+		  $("#ex_list").val(exlists);
+	  }
+	  else exlists = 0;
+	  if(exseg_array.length!=0) 
+	  {
+		  exlists_seg = exseg_array.join(",");
+		  $("#ex_list_seg").val(exlists_seg);
+	  }
+	  else exlists_seg = 0;
+      
+      $.post("./includes/create/calculate-totals.php", { include_lists: inlists, exclude_lists: exlists, include_lists_seg: inlists_seg, exclude_lists_seg: exlists_seg },
+		  function(data) {
+		      if(data == 'failed')
+		      {
+			    alert("Unable to calculate totals.");
+		      }
+		      else
+		      {
+				enable_btns();
+			  	$("#recipients").text(data);
+			  	$("#remaining").show();
+			  	recip = data;
+			  	
+			  	//if user have AWS keys, check quota
+				if($("#aws_keys_available").val()=='true' || $("#is_sub_user").val())
+				{
+				  //check if user is sending to more than SES allows
+				  if(recip > Number($("#ses_sends_left").val()) && Number($("#ses_sends_left").val())!='-1')
+				  {
+				  	  $("#over-limit").slideDown("fast");
+				      $("#recipients").css("color", "#FF0000");
+				      $("#recipients").css("font-weight", "bold");
+				      disable_btns();
+				  }
+				  else
+				  {
+				      $("#over-limit").slideUp("fast");
+				      $("#recipients").css("color", "#000000");
+				      $("#recipients").css("font-weight", "normal");
+				      enable_btns();
+				  }
+				}
+				$("#grand_total").text(
+					number_format(
+				  	Number($("#delivery_fee").text()) + 
+				  	(Number($("#recipient_fee").text()) * recip)
+					, 3, '.', ',')
+				);
+				$("#grand_total_val").val(
+					number_format(
+				  	Number($("#delivery_fee").text()) + 
+				  	(Number($("#recipient_fee").text()) * recip)
+					, 2, '.', ',')
+				);
+		      }
+		  }
+		);
     })
     .trigger('change');
 	
@@ -142,13 +248,18 @@ $(document).ready(function() {
 		}
 	});
 	
-	$('#datepicker').datepicker({
-		format: 'mm-dd-yyyy',
-		weekStart: 1
-	});
+	$('#datepicker').pikaday({ firstDay: 1 });
+	
+	$("#date-icon, #datepicker").css("cursor", "pointer");
+	$("#date-icon").click(function(){
+     	$("#datepicker").click();
+ 	});
 	
 	$("#schedule-form").submit(function(){
-		$("#email_lists").val($('select#email_list').val());
+		$("#email_lists").val(inlists);
+		$("#email_lists_excl").val(exlists);
+		$("#email_lists_segs").val(inlists_seg);
+		$("#email_lists_segs_excl").val(exlists_seg);
 		$("#grand_total_val2").val($('#grand_total_val').val());
 		$("#total_recipients2").val($("#recipients").text());
 	});

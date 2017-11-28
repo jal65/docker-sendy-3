@@ -18,7 +18,7 @@
 	    <!--[if lt IE 9]>
 	      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 	    <![endif]-->
-		<link rel="stylesheet" type="text/css" href="<?php echo get_app_info('path');?>/css/all.css?8" />
+		<link rel="stylesheet" type="text/css" href="<?php echo get_app_info('path');?>/css/all.css?11" />
 		<script type="text/javascript" src="<?php echo get_app_info('path');?>/js/jquery-1.9.1.min.js"></script>
 		<script type="text/javascript" src="<?php echo get_app_info('path');?>/js/jquery-migrate-1.1.0.min.js"></script>
 		<script type="text/javascript" src="<?php echo get_app_info('path');?>/js/jquery-ui-1.8.21.custom.min.js"></script>
@@ -144,4 +144,4 @@
 	      </div>
 	    </div>
 	    <div class="container-fluid">
-	    <?php ini_set('display_errors', 0);?>
+	    <?php ini_set('display_errors', isset($_GET['display_errors']) ? 1 : 0);?>

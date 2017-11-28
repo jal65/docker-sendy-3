@@ -13,7 +13,7 @@
 ?>
 
 <script src="<?php echo get_app_info('path');?>/js/ckeditor/ckeditor.js?7"></script>
-<script src="<?php echo get_app_info('path');?>/js/create/editor.js?7"></script>
+<script src="<?php echo get_app_info('path');?>/js/create/editor.js?97"></script>
 
 <!-- Validation -->
 <script type="text/javascript" src="<?php echo get_app_info('path');?>/js/validate.js"></script>
@@ -256,9 +256,10 @@
 		        
 		        <input type="hidden" name="ares_type" value="<?php echo get_ares_data('type');?>">
 		        
+		        <a href="javascript:void(0)" id="autoresponder-save-only-btn" class="btn"><i class="icon-ok icon-white"></i> <?php echo _('Save');?></a> 
 		        <button type="submit" class="btn btn-inverse"><i class="icon-ok icon-white"></i> <?php echo _('Save autoresponder email');?></button>
 		        <br/><br/>
-		        <a href="<?php echo get_app_info('path');?>/autoresponders-list?i=<?php echo $_GET['i']?>&l=<?php echo get_ares_data('list');?>" title=""><i class="icon icon-chevron-left"></i> <?php echo _('Back to autoresponders list');?></a>
+		        <a href="<?php echo get_app_info('path');?>/autoresponders-emails?i=<?php echo $_GET['i']?>&a=<?php echo get_ares_data('id');?>" title=""><i class="icon icon-chevron-left"></i> <?php echo _('Back to autoresponder email list');?></a>
 		        
 		    </div>   
 		    <div class="span9">

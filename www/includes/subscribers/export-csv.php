@@ -4,8 +4,8 @@
 
 /********************************/
 $userID = get_app_info('main_userID');
-$app = mysqli_real_escape_string($mysqli, $_GET['i']);
-$listID = mysqli_real_escape_string($mysqli, $_GET['l']);
+$app = isset($_GET['i']) && is_numeric($_GET['i']) ? mysqli_real_escape_string($mysqli, $_GET['i']) : exit;
+$listID = isset($_GET['l']) && is_numeric($_GET['l']) ? mysqli_real_escape_string($mysqli, $_GET['l']) : exit;
 
 //Check if sub user is trying to download CSVs from other brands
 if(get_app_info('is_sub_user')) 
@@ -66,7 +66,7 @@ if ($r && mysqli_num_rows($r) > 0)
     }  
 }
 
-$q2 = 'SELECT name, email, custom_fields FROM subscribers WHERE list = '.$listID.' '.$additional.' AND userID = '.$userID;
+$q2 = 'SELECT name, email, custom_fields FROM subscribers WHERE list = '.$listID.' '.$additional.' AND userID = '.$userID.' ORDER BY timestamp DESC';
 $r2 = mysqli_query($mysqli, $q2);
 if ($r2 && mysqli_num_rows($r2) > 0)
 {

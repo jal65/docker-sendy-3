@@ -95,8 +95,11 @@
 		$q = 'UPDATE ares_emails SET opens = "'.$val.'" WHERE id = '.$campaign_id;
 	else
 		$q = 'UPDATE campaigns SET opens = "'.$val.'" WHERE id = '.$campaign_id;
-	$r = mysqli_query($mysqli, $q);
-	if ($r){}
+	mysqli_query($mysqli, $q);
+	
+	//Update subscriber's timestamp
+	$q = 'UPDATE subscribers SET timestamp = "'.$time.'" WHERE id = '.$userID;
+	mysqli_query($mysqli, $q);
 	
 	//Just in case this user is set to bounced because Amazon can't deliver it the first time.
 	//If user opens the newsletter, it means user did not bounce, so we set bounced to 0

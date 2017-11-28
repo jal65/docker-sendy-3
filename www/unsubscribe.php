@@ -60,22 +60,36 @@
 		if ($r && mysqli_num_rows($r) > 0) while($row = mysqli_fetch_array($r)) $language = $row['language'];
 		set_locale($language);
 		
-		//check if email needs to be decrypted
+		//check if email is passed in as an email address instead of encrypted string
 		$validator = new EmailAddressValidator;
-		if (!$validator->check_email_address($email)) $email = short($email, true);
-		
-		//check if email is valid
-		$validator = new EmailAddressValidator;
-		if ($validator->check_email_address($email)) {}
-		else
+		if ($validator->check_email_address($email)) 
 		{
 			if($return_boolean=='true')
 			{
 				echo 'Invalid email address.';
 				exit;
 			}
+			else $feedback = _('Email address is invalid.');
+		}
+		else
+		{
+			$email = short($email, true);
+			
+			//check if email is valid
+			$validator = new EmailAddressValidator;
+			if ($validator->check_email_address($email)) 
+			{
+				
+			}
 			else
-			    $feedback = _('Email address is invalid.');
+			{
+				if($return_boolean=='true')
+				{
+					echo 'Invalid email address.';
+					exit;
+				}
+				else $feedback = _('Email address is invalid.');
+			}
 		}
 	}
 	else if(isset($_POST['email']))
@@ -153,7 +167,7 @@
 		    $all_lists = substr($all_lists, 0, -1);
 		}
 		
-		if($campaign_id=='' || $return_boolean=='true')
+		if(empty($campaign_id) || $return_boolean=='true')
 		{
 			if($unsubscribe_all_list) //if user wants to unsubscribe email from ALL lists
 				$q = 'UPDATE subscribers SET unsubscribed = 1, timestamp = '.$time.' WHERE email = "'.$email.'" AND list IN ('.$all_lists.')';
@@ -285,6 +299,7 @@ else:
 	if($unsubscribed_url != ''):
 		$unsubscribed_url = str_replace('%e', $email, $unsubscribed_url);
 		$unsubscribed_url = str_replace('%l', short($list_id), $unsubscribed_url);
+		$unsubscribed_url = str_replace('%s', APP_PATH.'/subscribe/'.short($email).'/'.short($list_id), $unsubscribed_url);
 		header("Location: ".$unsubscribed_url);
 	else:
 ?>

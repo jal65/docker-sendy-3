@@ -19,8 +19,9 @@
 ?>
 
 <?php include('js/create/main.php');?>
-<script type="text/javascript" src="<?php echo get_app_info('path');?>/js/datepicker.js"></script>
-<link rel="stylesheet" type="text/css" href="css/datepicker.css" />
+<script type="text/javascript" src="<?php echo get_app_info('path');?>/js/pickaday/pikaday.js"></script>
+<script type="text/javascript" src="<?php echo get_app_info('path');?>/js/pickaday/pikaday.jquery.js"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo get_app_info('path');?>/js/pickaday/pikaday.css" />
 <div class="row-fluid">
     <div class="span2">
         <?php include('includes/sidebar.php');?>
@@ -78,13 +79,11 @@
 					$from_email_domain_array = explode('@', $from_email);
 					$from_email_domain = $from_email_domain_array[1];
   					date_default_timezone_set($timezone);
-		    		$day = strftime("%d", $send_date);
-		    		$month = strftime("%m", $send_date);
-		    		$year = strftime("%Y", $send_date);
 		    		$hour = strftime("%l", $send_date);
 		    		$minute = strftime("%M", $send_date);
 		    		$ampm = strtolower(strftime("%p", $send_date));
 		    		$the_date = $month.'-'.$day.'-'.$year;
+		    		$the_date = strftime("%a %b %d %G", $send_date);
   					
   					if($send_date=='')
   					{
@@ -100,6 +99,32 @@
   					}
   			    }  
   			}
+  			
+  			//Check if 'ONLY_FULL_GROUP_BY' is present in @@sql_mode
+			$q = 'select @@sql_mode';
+			$r = mysqli_query($mysqli, $q);
+			if ($r) while($row = mysqli_fetch_array($r)) $sql_mode = $row['@@sql_mode'];
+			$only_full_group_by = strpos($sql_mode, 'ONLY_FULL_GROUP_BY') !== false ? true : false;
+			if($only_full_group_by)
+			{
+				//ONLY_FULL_GROUP_BY is enabled in sql_mode, campaign cannot be send until 'ONLY_FULL_GROUP_BY' is removed from sql_mode
+				echo '<div class="alert alert-danger">
+						<p><strong>'._('Please disable \'ONLY_FULL_GROUP_BY\' from \'sql_mode\'').'</strong></p>
+						<p>'._('We have detected that \'ONLY_FULL_GROUP_BY\' is enabled in \'sql_mode\' in your MySQL server. Your campaign will fail to send unless \'ONLY_FULL_GROUP_BY\' is removed from \'sql_mode\'. Here\'s how to fix this &rarr; ').'<a href="https://sendy.co/troubleshooting#ubuntu-campaign-sent-to-0-recipients-and-or-autoresponders-not-sending" target="_blank">https://sendy.co/troubleshooting#ubuntu-campaign-sent-to-0-recipients-and-or-autoresponders-not-sending</a></p>
+						<p>'._('Once done, refresh this page and this error message should disappear.').'</p>
+					</div>
+					<script type="text/javascript">
+						$(document).ready(function() {
+							$("#real-btn").addClass("disabled");
+							$("#test-send-btn").addClass("disabled");
+							$("#schedule-btn").addClass("disabled");
+							$("#real-btn").attr("disabled", "disabled");
+							$("#test-send-btn").attr("disabled", "disabled");
+							$("#schedule-btn").attr("disabled", "disabled");
+							$("#email_list").attr("disabled", "disabled");
+						});
+					</script>';
+			}
   			
   			//Check if from email is verified in SES console
   			if(!get_app_info('is_sub_user') && get_app_info('s3_key')!='' && get_app_info('s3_secret')!='')
@@ -201,7 +226,7 @@
 	    	<label class="control-label" for="test_email"><?php echo _('Test email(s)');?></label>
 	    	<div class="control-group">
 		    	<div class="controls">
-	              <input type="text" class="input-xlarge" id="test_email" name="test_email" placeholder="<?php echo _('Email addresses, separated by comma');?>" value="<?php echo get_app_data('test_email');?>">
+	              <input type="text" class="input-xlarge" id="test_email" name="test_email" placeholder="<?php echo _('Email addresses, separated by comma');?>" value="<?php echo get_app_data('test_email');?>" style="width: 85%;">
 	            </div>
 	        </div>
 	        <input type="hidden" name="cid" value="<?php echo $cid;?>">
@@ -221,50 +246,189 @@
 				<form action="<?php echo get_app_info('path')?>/includes/create/send-now.php" method="POST" accept-charset="utf-8" class="form-vertical" id="real-form">
 			<?php endif;?>
 	    	<div class="control-group">
-            <label class="control-label" for="multiSelect"><?php echo _('Select email list(s)');?></label>
-            <div class="controls">
-              <select multiple="multiple" id="email_list" name="email_list[]" style="height:200px">
-              	<?php 
-	              	$q = 'SELECT * FROM lists WHERE app = '.get_app_info('app').' AND userID = '.get_app_info('main_userID').' ORDER BY name ASC';
-	              	$r = mysqli_query($mysqli, $q);
-	              	if ($r && mysqli_num_rows($r) > 0)
-	              	{
-	              	    while($row = mysqli_fetch_array($r))
-	              	    {
-	              			$list_id = stripslashes($row['id']);
-	              			$list_name = stripslashes($row['name']);
-	              			$list_selected = '';
-	              			
-	              			$q2 = 'SELECT lists FROM campaigns WHERE id = '.$cid;
-	              			$r2 = mysqli_query($mysqli, $q2);
-	              			if ($r2)
-	              			{
-	              			    while($row = mysqli_fetch_array($r2))
-	              			    {
-	              					$lists = $row['lists'];
-	              					$lists_array = explode(',', $lists);
-	              					if(in_array($list_id, $lists_array))
-	              						$list_selected = 'selected';
-	              			    }  
-	              			}
-	              			
-	              			echo '<option value="'.$list_id.'" data-quantity="'.get_list_quantity($list_id).'" id="'.$list_id.'" '.$list_selected.'>'.$list_name.'</option>';
-	              	    }  
-	              	}
-	              	else
-	              	{
-		              	echo '<option value="" onclick="window.location=\''.get_app_info('path').'/new-list?i='.$aid.'\'">'._('No list found, click to add one.').'</option>';
-	              	}
-              	?>
-              </select>
+	            <label class="control-label" for="multiSelect"><?php echo _('Choose your lists & segments');?></label>
+	            <div class="controls">
+	              <select multiple="multiple" id="email_list" name="email_list[]" style="height:200px; width: 85%;">
+				  		<optgroup label="Lists">
+						<?php 
+							$q = 'SELECT * FROM lists WHERE app = '.get_app_info('app').' AND userID = '.get_app_info('main_userID').' ORDER BY name ASC';
+							$r = mysqli_query($mysqli, $q);
+							if ($r && mysqli_num_rows($r) > 0)
+							{
+							    while($row = mysqli_fetch_array($r))
+							    {
+									$list_id = stripslashes($row['id']);
+									$list_name = stripslashes($row['name']);
+									$list_selected = '';
+									
+									$q2 = 'SELECT lists FROM campaigns WHERE id = '.$cid;
+									$r2 = mysqli_query($mysqli, $q2);
+									if ($r2)
+									{
+									    while($row = mysqli_fetch_array($r2))
+									    {
+											$lists = $row['lists'];
+											$lists_array = explode(',', $lists);
+											if(in_array($list_id, $lists_array))
+												$list_selected = 'selected';
+									    }  
+									}
+									
+									echo '<option value="'.$list_id.'" data-quantity="'.get_list_quantity($list_id).'" id="'.$list_id.'" '.$list_selected.'>'.$list_name.'</option>';
+							    }  
+							}
+							else
+							{
+						  	echo '<option value="" onclick="window.location=\''.get_app_info('path').'/new-list?i='.$aid.'\'">'._('No list found, click to add one.').'</option>';
+							}
+						?>
+						<option disabled></option>
+						<?php if(have_segments()):?>
+							<optgroup label="<?php echo _('Segments');?>">
+							<?php 
+								$q = 'SELECT id, name, list FROM seg WHERE app = '.get_app_info('app');
+								$r = mysqli_query($mysqli, $q);
+								if ($r && mysqli_num_rows($r) > 0)
+								{
+								    while($row = mysqli_fetch_array($r))
+								    {
+								    	$seg_id = $row['id'];
+										$seg_name = $row['name'];
+										$seg_list_id = $row['list'];
+										$list_selected = '';
+										
+										$q2 = 'SELECT segs FROM campaigns WHERE id = '.$cid;
+										$r2 = mysqli_query($mysqli, $q2);
+										if ($r2)
+										{
+										    while($row = mysqli_fetch_array($r2))
+										    {
+												$segs = $row['segs'];
+												$segs_array = explode(',', $segs);
+												if(in_array($seg_id, $segs_array))
+													$list_selected = 'selected';
+										    }  
+										}
+										
+										echo '<option value="'.$seg_id.'" data-is-seg="yes" id="seg_'.$seg_id.'" '.$list_selected.'>'.$seg_name.'</option>';
+									}
+								}
+							?>
+						<?php else:?>
+							<optgroup label="<?php echo _('Segments');?>" style="color:#dddddd;">
+							<option disabled><?php echo _('No segments found');?></option>
+						<?php endif;?>
+	              </select><br/>
+	              
+	              <p id="excl" style="margin-top:5px;"><a href="javascript:void(0)" class="btn" id="exclude_btn"><span class="icon icon-minus-sign"></span> <?php echo _('Exclude lists from this campaign?');?></a><br/><br/></p>
+	              <script type="text/javascript">
+		              $(document).ready(function() {
+					  	$("#exclude_btn").click(function(){
+						  	$("#excl").slideUp();
+						  	$("#exclude_list_select").slideDown();
+					  	});
+					  });
+	              </script>
+	            </div>
             </div>
-          </div>
+            
+            <!-- Exclude lists -->
+            <div class="control-group" id="exclude_list_select" style="display:none;">
+	            <label class="control-label" for="multiSelect" width="200"><?php echo _('Don\'t include emails from these list & segments');?></label>
+	            <div class="controls">
+					<select multiple="multiple" id="email_list_exclude" name="email_list_exclude[]" style="height:200px; width: 85%;">
+						<optgroup label="Lists">
+						<?php 
+							$q = 'SELECT * FROM lists WHERE app = '.get_app_info('app').' AND userID = '.get_app_info('main_userID').' ORDER BY name ASC';
+							$r = mysqli_query($mysqli, $q);
+							if ($r && mysqli_num_rows($r) > 0)
+							{
+							    while($row = mysqli_fetch_array($r))
+							    {
+									$list_id = stripslashes($row['id']);
+									$list_name = stripslashes($row['name']);
+									$list_selected = '';
+									
+									$q2 = 'SELECT lists_excl, segs_excl FROM campaigns WHERE id = '.$cid;
+									$r2 = mysqli_query($mysqli, $q2);
+									if ($r2)
+									{
+									    while($row = mysqli_fetch_array($r2))
+									    {
+											$lists = $row['lists_excl'];
+											$segs = $row['segs_excl'];
+											if($lists != '' || $segs !='')
+											{
+							  					echo '<script charset="utf-8">
+									            	$(document).ready(function() {
+														$("#excl").hide();
+														$("#exclude_list_select").show();
+													});
+									            </script>';
+											}
+											$lists_array = explode(',', $lists);
+											if(in_array($list_id, $lists_array))
+												$list_selected = 'selected';
+									    }  
+									}
+									
+									echo '<option value="'.$list_id.'" id="excl_'.$list_id.'" '.$list_selected.'>'.$list_name.'</option>';
+							    }  
+							}
+							else
+							{
+						  	echo '<option value="" onclick="window.location=\''.get_app_info('path').'/new-list?i='.$aid.'\'">'._('No list found, click to add one.').'</option>';
+							}
+						?>
+						<option disabled></option>
+						<?php if(have_segments()):?>
+							<optgroup label="<?php echo _('Segments');?>">
+							<?php 
+								$q = 'SELECT id, name, list FROM seg WHERE app = '.get_app_info('app');
+								$r = mysqli_query($mysqli, $q);
+								if ($r && mysqli_num_rows($r) > 0)
+								{
+								    while($row = mysqli_fetch_array($r))
+								    {
+								    	$seg_id = $row['id'];
+										$seg_name = $row['name'];
+										$seg_list_id = $row['list'];
+										$list_selected = '';
+										
+										$q2 = 'SELECT segs_excl FROM campaigns WHERE id = '.$cid;
+										$r2 = mysqli_query($mysqli, $q2);
+										if ($r2)
+										{
+										    while($row = mysqli_fetch_array($r2))
+										    {
+												$segs_excl = $row['segs_excl'];
+												$segs_excl_array = explode(',', $segs_excl);
+												if(in_array($seg_id, $segs_excl_array))
+													$list_selected = 'selected';
+										    }  
+										}
+										
+										echo '<option value="'.$seg_id.'" data-is-seg="yes" id="excl_seg_'.$seg_id.'" '.$list_selected.'>'.$seg_name.'</option>';
+									}
+								}
+							?>
+						<?php else:?>
+							<optgroup label="<?php echo _('Segments');?>" style="color:#dddddd;">
+							<option disabled><?php echo _('No segments found');?></option>
+						<?php endif;?>
+					</select>
+				</div>
+            </div>
 	        <input type="hidden" name="cid" value="<?php echo $cid;?>">
 	        <input type="hidden" name="uid" value="<?php echo $aid;?>">
 	        <input type="hidden" name="path" value="<?php echo get_app_info('path');?>">
 	        <input type="hidden" name="grand_total_val" id="grand_total_val">
 	        <input type="hidden" name="cron" value="<?php echo $cron;?>">
 	        <input type="hidden" name="total_recipients" id="total_recipients">
+	        <input type="hidden" name="in_list" id="in_list">
+	        <input type="hidden" name="ex_list" id="ex_list">
+	        <input type="hidden" name="in_list_seg" id="in_list_seg">
+	        <input type="hidden" name="ex_list_seg" id="ex_list_seg">
 	        
 	        <?php				
 	        	//Get SES quota (array)
@@ -360,7 +524,7 @@
 		        
 			        <?php if($brand_monthly_quota!=-1):?><strong><?php echo _('Monthly limit');?></strong>: <?php echo $brand_monthly_quota.' ('._('resets on').' '.$month_of_next_reset.' '.$brand_limit_resets_on;?>)<br/><?php endif;?>
 		        	<strong><?php echo _('Recipients');?></strong>: <span id="recipients">0</span> 
-		        	<?php if($brand_monthly_quota!=-1) echo _('of').' '.$brand_sends_left._(' remaining')?><br/><br/>
+		        	<?php if($brand_monthly_quota!=-1) echo '<span id="remaining">'._('of').' '.$brand_sends_left._(' remaining').'</span>'?><br/><br/>
 		        	
 		        	<!-- over limit msg -->
 			    	<div class="alert alert-error" id="over-limit" style="display:none;">
@@ -389,7 +553,7 @@
 			        <div class="well" style="width:260px;">
 			        	<?php if($brand_monthly_quota!=-1):?><strong><?php echo _('Monthly limit');?></strong>: <?php echo $brand_monthly_quota.' ('._('resets on').' '.$month_of_next_reset.' '.$brand_limit_resets_on;?>)<br/><?php endif;?>
 				        <strong><?php echo _('Recipients');?></strong>: <span id="recipients">0</span> 
-				        <?php if($brand_monthly_quota!=-1) echo _('of').' '.$brand_sends_left._(' remaining')?><br/>
+				        <?php if($brand_monthly_quota!=-1) echo '<span id="remaining">'._('of').' '.$brand_sends_left._(' remaining').'</span>'?><br/>
 				        <strong><?php echo _('Delivery Fee');?></strong>: <?php echo get_fee('currency');?> <span id="delivery_fee"><?php echo get_fee('delivery_fee');?></span><br/>
 				        <strong><?php echo _('Fee per recipient');?></strong>: <?php echo get_fee('currency');?> <span id="recipient_fee"><?php echo get_fee('cost_per_recipient');?></span><br/><br/>
 				        <span class="grand_total"><strong><?php echo _('Grand total');?></strong>: <?php echo get_fee('currency');?> <span id="grand_total">0</span></span>
@@ -412,7 +576,7 @@
 		        
 		    <?php else:?>
 		    
-		    	<strong><?php echo _('Recipients');?></strong>: <span id="recipients">0</span> <?php echo $aws_keys_available=='true' ? _('of') : '';?> <?php echo $aws_keys_available=='true' ? $ses_sends_left : ''; echo _(' remaining');?><br/>
+		    	<strong><?php echo _('Recipients');?></strong>: <span id="recipients">0</span> <span id="remaining"><?php echo $aws_keys_available=='true' ? _('of') : '';?> <?php echo $aws_keys_available=='true' ? $ses_sends_left : ''; echo $aws_keys_available=='true' ? _(' remaining') : '';?></span><br/>
 		    	
 		    	<?php if($aws_keys_available=='true'):?>
 		    	<strong><?php echo _('SES sends left');?></strong>: <span id="sends_left"><?php echo $ses_sends_left.' of '.$ses_quota;?></span><br/>
@@ -649,6 +813,9 @@
 		    	<h3><i class="icon-ok icon-time" style="margin-top:5px;"></i> <?php echo _('Schedule this campaign');?></h3><br/>
 	    		<input type="hidden" name="campaign_id" value="<?php echo $cid;?>"/>
 	    		<input type="hidden" name="email_lists" id="email_lists"/>
+	    		<input type="hidden" name="email_lists_excl" id="email_lists_excl"/>
+	    		<input type="hidden" name="email_lists_segs" id="email_lists_segs"/>
+	    		<input type="hidden" name="email_lists_segs_excl" id="email_lists_segs_excl"/>
 	    		<input type="hidden" name="app" value="<?php echo $aid;?>"/>
 	    		
 	    		<label for="send_date"><?php echo _('Pick a date');?></label>
@@ -656,14 +823,11 @@
 	    			if($send_date=='')
 	    			{
 		    			$tomorrow = time()+86400;
-			    		$day = strftime("%d", $tomorrow);
-			    		$month = strftime("%m", $tomorrow);
-			    		$year = strftime("%Y", $tomorrow);
-			    		$the_date = $month.'-'.$day.'-'.$year;
+			    		$the_date = strftime("%a %b %d %G", $tomorrow);
 			    	}
 	    		?>
-	    		<div class="input-prepend date" id="datepicker" data-date="<?php echo $the_date;?>" data-date-format="mm-dd-yyyy">
-	             <input type="text" name="send_date" value="<?php echo $the_date;?>" readonly><span class="add-on"><i class="icon-calendar" id="date-icon"></i></span>
+	    		<div class="input-prepend date">
+	             <span class="add-on"><i class="icon-calendar" id="date-icon"></i></span><input type="text" name="send_date" value="<?php echo $the_date;?>" id="datepicker" readonly>
 	            </div>
 	            <br/>
 	            <label><?php echo _('Set a time');?></label>
@@ -812,10 +976,7 @@
 		$("#schedule-btn").click(function(e){
 			e.preventDefault(); 
 			
-			send_or_schedule = 'schedule';
-			email_list = $('select#email_list').val();
-			
-			if(email_list == null)
+			if(email_list == null || $("#recipients").text()=="0")
 			{
 				$("#schedule-btn").effect("shake", { times:3 }, 60);
 				$("#email_list").effect("shake", { times:3 }, 60);
@@ -832,9 +993,7 @@
 		$("#real-form").submit(function(e){
 			e.preventDefault(); 
 			
-			send_or_schedule = 'send';
-			
-			if($("#email_list").val() == null)
+			if($("#email_list").val() == null || $("#recipients").text()=="0")
 			{
 				$("#real-btn").effect("shake", { times:3 }, 60);
 				$("#email_list").effect("shake", { times:3 }, 60);
@@ -853,7 +1012,7 @@
 		//send to PayPal
 		$("#pay-form").submit(function(e){
 			$("#total_recipients").val($("#recipients").text());
-			if($('select#email_list').val() == null)
+			if($('select#email_list').val() == null || $("#recipients").text()=="0")
 			{
 				e.preventDefault(); 
 				$("#pay-btn").effect("shake", { times:3 }, 60);
@@ -868,18 +1027,19 @@
 		});
 		
 		function send_it()
-		{
-			$('#sns-loading').modal('hide');
-			
+		{			
 			$("#total_recipients").val($("#recipients").text());
 			
 			var $form = $("#real-form"),
 			campaign_id = $form.find('input[name="cid"]').val(),
-			email_list = $form.find('select#email_list').val(),
 			uid = $form.find('input[name="uid"]').val(),
 			path = $form.find('input[name="path"]').val(),
 			cron = $form.find('input[name="cron"]').val(),
 			total_recipients = $form.find('input[name="total_recipients"]').val(),
+			inlists = $("#in_list").val();
+			exlists = $("#ex_list").val();
+			inlists_seg = $("#in_list_seg").val();
+			exlists_seg = $("#ex_list_seg").val();			
 			url = $form.attr('action');
 			
 			$("#real-btn").addClass("disabled");
@@ -887,7 +1047,7 @@
 			$("#view-report").show();
 			$("#edit-newsletter").hide();
 				
-			$.post(url, { campaign_id: campaign_id, email_list: email_list, app: uid, cron: cron, total_recipients: total_recipients },
+			$.post(url, { campaign_id: campaign_id, email_list: inlists, email_list_exclude: exlists, email_lists_segs: inlists_seg, email_lists_segs_excl: exlists_seg, app: uid, cron: cron, total_recipients: total_recipients },
 			  function(data) {
 			  	  
 			  	  $("#test-send").css("display", "none");
@@ -903,30 +1063,8 @@
 			  }
 			);
 		}
-		
-		$("#send-anyway").click(function(){
-			if(send_or_schedule=='send') send_it();
-			else $("#schedule-form").submit();
-		});
 	});
 </script>
-
-<div id="sns-loading" class="modal hide fade">
-<div class="modal-header">
-  <button type="button" class="close" data-dismiss="modal">&times;</button>
-  <h3><?php echo _('Checking bounces & complaints set up');?></h3>
-</div>
-<div class="modal-body">
-    <div class="well" style="float:left;">
-    	<img src="<?php echo get_app_info('path');?>/img/loader.gif" style="float:left; margin-right:5px; width: 16px;"/> 
-    	<p style="float:right; width:450px;">
-	    	<span id="please-wait-msg"><?php echo _('Please wait while we check if bounces & complaints have been set up. Checks are only done once per \'From email\'.');?></span>
-	    </p>
-    </div>
-    <p style="float:left; clear:both;"><i><?php echo _('If this window does not disappear after 10 seconds, hit \'Esc\' and try again.');?></i></p>
-</div>
-
-</div>
 
 <div id="sns-warning" class="modal hide fade">
 <div class="modal-header">

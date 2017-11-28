@@ -52,6 +52,34 @@
 	}
 	
 	//------------------------------------------------------//
+	function get_seg_data($val, $sid)
+	//------------------------------------------------------//
+	{
+		global $mysqli;
+		$q = 'SELECT '.$val.' FROM seg WHERE id = '.$sid;
+		$r = mysqli_query($mysqli, $q);
+		if ($r && mysqli_num_rows($r) > 0)
+		{
+		    while($row = mysqli_fetch_array($r))
+		    {
+				return $row[$val];
+		    }  
+		}
+	}
+	
+	//------------------------------------------------------//
+	function get_totals_in_seg($val)
+	//------------------------------------------------------//
+	{
+		global $mysqli;
+		$q2 = 'SELECT COUNT(*) AS subscriber_count FROM subscribers_seg WHERE seg_id = '.$val;
+		$r2 = mysqli_query($mysqli, $q2);
+		if ($r2 && mysqli_num_rows($r2) > 0)
+		    while($row = mysqli_fetch_array($r2))
+				return number_format($row['subscriber_count']);
+	}
+	
+	//------------------------------------------------------//
 	function totals($list)
 	//------------------------------------------------------//
 	{
@@ -127,6 +155,22 @@
 	{
 		global $mysqli;
 		$q = 'SELECT COUNT(*) FROM ares WHERE list = '.mysqli_real_escape_string($mysqli, $_GET['l']);
+		$r = mysqli_query($mysqli, $q);
+		if ($r && mysqli_num_rows($r) > 0)
+		{
+		    while($row = mysqli_fetch_array($r))
+		    {
+				return $row['COUNT(*)'];
+		    }  
+		}
+	}
+	
+	//------------------------------------------------------//
+	function get_segments_count()
+	//------------------------------------------------------//
+	{
+		global $mysqli;
+		$q = 'SELECT COUNT(*) FROM seg WHERE list = '.mysqli_real_escape_string($mysqli, $_GET['l']);
 		$r = mysqli_query($mysqli, $q);
 		if ($r && mysqli_num_rows($r) > 0)
 		{

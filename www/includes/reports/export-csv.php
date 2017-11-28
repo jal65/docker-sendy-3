@@ -238,41 +238,44 @@ else
 //Export
 $select = 'SELECT name, email FROM '.$table.' where id IN ('.$subscribers.') '.$additional_query;
 $export = mysqli_query($mysqli, $select);
-$fields = mysqli_num_fields ( $export );
-$data = '';
-while( $row = mysqli_fetch_row( $export ) )
+if($export)
 {
-    $line = '';
-    $i = 1;
-    foreach( $row as $value )
-    {                                            
-        if ( ( !isset( $value ) ) || ( $value == "" ) )
-        {
-        	if($i<$fields)
-	            $value = ",";
-        }
-        else
-        {
-            $value = str_replace( '"' , '""' , $value );
-            if($i<$fields)
-	            $value = '"'.$value . '",';
-        }
-        $line .= $value.'"';
-        $i++;
-    }
-    $data .= trim( $line ) . "\n";
+	$fields = mysqli_num_fields ( $export );
+	$data = '';
+	while( $row = mysqli_fetch_row( $export ) )
+	{
+	    $line = '';
+	    $i = 1;
+	    foreach( $row as $value )
+	    {                                            
+	        if ( ( !isset( $value ) ) || ( $value == "" ) )
+	        {
+	        	if($i<$fields)
+		            $value = ",";
+	        }
+	        else
+	        {
+	            $value = str_replace( '"' , '""' , $value );
+	            if($i<$fields)
+		            $value = '"'.$value . '",';
+	        }
+	        $line .= $value.'"';
+	        $i++;
+	    }
+	    $data .= trim( $line ) . "\n";
+	}
+	$data = str_replace( "\r" , "" , $data );
+	
+	if ( $data == "" )
+	{
+	    $data = "\n(0) Records Found!\n";                        
+	}
+	
+	header("Content-type: application/octet-stream");
+	header("Content-Disposition: attachment; filename=$filename");
+	header("Pragma: no-cache");
+	header("Expires: 0");
+	print "$data";
 }
-$data = str_replace( "\r" , "" , $data );
-
-if ( $data == "" )
-{
-    $data = "\n(0) Records Found!\n";                        
-}
-
-header("Content-type: application/octet-stream");
-header("Content-Disposition: attachment; filename=$filename");
-header("Pragma: no-cache");
-header("Expires: 0");
-print "$data";
- 
+else echo 'Can\'t export CSV. Number of records may be too large. Try increasing MySQL\'s max_allowed_packet.'; 
 ?>

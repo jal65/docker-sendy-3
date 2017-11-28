@@ -36,7 +36,10 @@
 ?>
 <?php 
 	$campaign_id = is_numeric($_GET['c']) ? $_GET['c'] : exit;
-	$email_list = explode(',', $_GET['e']);
+	$email_list = mysqli_real_escape_string($mysqli, $_GET['e']);
+	$email_list_exclude = mysqli_real_escape_string($mysqli, $_GET['ex']);
+	$email_lists_segs = mysqli_real_escape_string($mysqli, $_GET['e_segs']);
+	$email_lists_segs_excl = mysqli_real_escape_string($mysqli, $_GET['ex_segs']);
 	$app = is_numeric($_GET['i']) ? $_GET['i'] : exit;
 	$schedule = $_GET['s'];
 	if(isset($_GET['cr'])) $cron = is_numeric($_GET['cr']) ? $_GET['cr'] : exit;
@@ -90,7 +93,7 @@ if($schedule=='true'):
 	$the_date = mysqli_real_escape_string($mysqli, $_GET['date']);
 	$timezone = mysqli_real_escape_string($mysqli, $_GET['timezone']);
 	
-	$q = 'UPDATE campaigns SET send_date = "'.$the_date.'", lists = "'.mysqli_real_escape_string($mysqli, $_GET['e']).'", timezone = "'.$timezone.'", quota_deducted = '.$total_recipients.' WHERE id = '.$campaign_id;
+	$q = 'UPDATE campaigns SET send_date = "'.$the_date.'", lists = "'.$email_list.'", lists_excl = "'.$email_list_exclude.'", segs = "'.$email_lists_segs.'", segs_excl = "'.$email_lists_segs_excl.'", timezone = "'.$timezone.'", quota_deducted = '.$total_recipients.' WHERE id = '.$campaign_id;
 	$r = mysqli_query($mysqli, $q);
 	if($r):
 	?>
@@ -164,16 +167,32 @@ if($schedule=='true'):
 			<?php if($sent==''):?>
 			<script type="text/javascript">
 				$(document).ready(function() {
-					list = [<?php 
-						for($i=0;$i<count($email_list);$i++)
-						{
-							echo "'".htmlspecialchars(addslashes($email_list[$i]))."'";
-							
-							if($i<count($email_list)-1)
-								echo ',';
-						}
-					?>];
-					$.post("<?php echo APP_PATH;?>/includes/create/send-now.php", { campaign_id: <?php echo $campaign_id;?>, email_list: list, app: <?php echo $app;?>, cron: <?php echo $cron;?> },
+					
+					<?php if($email_list!=''):?>
+						list = "<?php echo $email_list;?>";
+					<?php else:?>
+						list = "0";
+					<?php endif;?>
+					
+					<?php if($email_lists_segs!=''):?>
+						list_segs = "<?php echo $email_lists_segs;?>";
+					<?php else:?>
+						list_segs = "0";
+					<?php endif;?>
+					
+					<?php if($email_list_exclude!=''):?>
+						list_excl = "<?php echo $email_list_exclude;?>";
+					<?php else:?>	
+						list_excl = "0";
+					<?php endif;?>
+					
+					<?php if($email_lists_segs_excl!=''):?>
+						list_excl_segs = "<?php echo $email_lists_segs_excl;?>";
+					<?php else:?>	
+						list_excl_segs = "0";
+					<?php endif;?>
+					
+					$.post("<?php echo APP_PATH;?>/includes/create/send-now.php", { campaign_id: <?php echo $campaign_id;?>, email_list: list, email_list_exclude: list_excl, email_lists_segs: list_segs, email_lists_segs_excl: list_excl_segs, app: <?php echo $app;?>, cron: <?php echo $cron;?>, total_recipients: <?php echo $total_recipients;?> },
 					  function(data) {
 					      if(data){}
 					  }

@@ -177,4 +177,21 @@
 		    return $rows == 0 ? false : true;
 		}
 	}
+	
+	//------------------------------------------------------//
+	function have_segments()
+	//------------------------------------------------------//
+	{
+		global $mysqli;
+		$q = 'SELECT COUNT(*) FROM seg WHERE app = '.get_app_info('app');
+		$r = mysqli_query($mysqli, $q);
+		if ($r && mysqli_num_rows($r) > 0)
+		{
+		    while($row = mysqli_fetch_array($r))
+		    {
+				$rows = $row['COUNT(*)'];
+		    }  
+		    return $rows == 0 ? false : true;
+		}
+	}
 ?>

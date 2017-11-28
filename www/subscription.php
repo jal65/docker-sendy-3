@@ -89,7 +89,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="Shortcut Icon" type="image/ico" href="<?php echo APP_PATH;?>/img/favicon.png">
-		<link rel="stylesheet" type="text/css" href="<?php echo APP_PATH;?>/css/subscription.css?2" />
+		<link rel="stylesheet" type="text/css" href="<?php echo APP_PATH;?>/css/subscription.css?3" />
 		<script type="text/javascript" src="<?php echo APP_PATH;?>/js/jquery-1.9.1.min.js"></script>
 		<script type="text/javascript" src="<?php echo APP_PATH;?>/js/jquery-migrate-1.1.0.min.js"></script>
 		<title><?php echo _('Join our mailing list');?></title>
@@ -114,6 +114,11 @@
 					<div>
 						<label for="email"><?php echo _('Email');?></label>
 						<input type="email" name="email" id="email"/>
+					</div>
+					
+					<div id="hp">
+						<label for="email">HP</label>
+						<input type="text" name="hp" id="hp"/>
 					</div>
 					
 					<?php 
@@ -141,7 +146,6 @@
 						    } 
 						}
 					?>
-					
 					<input type="hidden" name="list" value="<?php echo $lid;?>"/>
 					
 					<a href="javascript:void(0)" title="" id="submit"><?php echo _('Sign up');?></a>

@@ -28,6 +28,7 @@
 	$track_clicks = isset($_POST['clicks']) ? $_POST['clicks'] : 1;
 	$wysiwyg = $wysiwyg=='1' ? 1 : 0;
 	$time_condition_sign = $time_condition_beforeafter=='before' ? '-' : '+';
+	if(isset($_POST['save-only'])) $save_only = is_numeric($_POST['save-only']) ? $_POST['save-only'] : 0;
 	
 	//get allowed attachments
 	$q = 'SELECT allowed_attachments FROM apps WHERE id = '.get_app_info('app');
@@ -84,7 +85,7 @@
 				}
 			}
 			
-			if($w_clicked)
+			if($w_clicked || $save_only)
 				header('Location: '.get_app_info('path').'/autoresponders-edit?i='.get_app_info('app').'&a='.$ares_id.'&ae='.$ae);
 			else
 				header('Location: '.get_app_info('path').'/autoresponders-emails?i='.get_app_info('app').'&a='.$ares_id);
@@ -124,7 +125,7 @@
 				}
 			}
 			
-			if($w_clicked)
+			if($w_clicked || $save_only)
 				header('Location: '.get_app_info('path').'/autoresponders-edit?i='.get_app_info('app').'&a='.$ares_id.'&ae='.$ae);
 			else
 				header('Location: '.get_app_info('path').'/autoresponders-emails?i='.get_app_info('app').'&a='.$ares_id);

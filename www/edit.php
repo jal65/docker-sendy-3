@@ -38,7 +38,7 @@
 	if(get_saved_data('wysiwyg')):
 	$html_code_msg = '<span class="wysiwyg-note">'._('Switch to HTML editor if the WYSIWYG editor is causing your newsletter to look weird.').'</span>';
 ?>
-<script src="<?php echo get_app_info('path');?>/js/create/editor.js?8"></script>
+<script src="<?php echo get_app_info('path');?>/js/create/editor.js?98"></script>
 <?php 
 else:
 	$html_code_msg = '<span class="wysiwyg-note">'._('Switch to the WYSIWYG editor to use formatting tools.').'</span>';

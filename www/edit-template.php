@@ -31,7 +31,7 @@
 ?>
 
 <script src="<?php echo get_app_info('path');?>/js/ckeditor/ckeditor.js?7"></script>
-<script src="<?php echo get_app_info('path');?>/js/create/editor.js?7"></script>
+<script src="<?php echo get_app_info('path');?>/js/create/editor.js?97"></script>
 
 <!-- Validation -->
 <script type="text/javascript" src="<?php echo get_app_info('path');?>/js/validate.js"></script>

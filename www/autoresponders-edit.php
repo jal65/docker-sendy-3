@@ -27,7 +27,7 @@
 <?php if(get_saved_data('wysiwyg')):
 	$html_code_msg = '<span class="wysiwyg-note">'._('Switch to HTML editor if the WYSIWYG editor is causing your newsletter to look weird.').'</span>';
 ?>
-<script src="<?php echo get_app_info('path');?>/js/create/editor.js?7"></script>
+<script src="<?php echo get_app_info('path');?>/js/create/editor.js?97"></script>
 <?php 
 else:
 	$html_code_msg = '<span class="wysiwyg-note">'._('Switch to the WYSIWYG editor to use formatting tools.').'</span>';
@@ -418,7 +418,10 @@ endif;?>
 		        
 		        <input type="hidden" name="ares_type" value="<?php echo get_ares_data('type');?>">
 		        
+		        <a href="javascript:void(0)" id="autoresponder-save-only-btn" class="btn"><i class="icon-ok icon-white"></i> <?php echo _('Save');?></a>
 		        <button type="submit" class="btn btn-inverse"><i class="icon-ok icon-white"></i> <?php echo _('Save autoresponder email');?></button>
+		        <br/><br/>
+		        <a href="<?php echo get_app_info('path');?>/autoresponders-emails?i=<?php echo $_GET['i']?>&a=<?php echo get_ares_data('id');?>" title=""><i class="icon icon-chevron-left"></i> <?php echo _('Back to autoresponder email list');?></a>
 		        
 		    </div>   
 		    <div class="span9">

@@ -162,19 +162,90 @@
 		global $mysqli;
 		$name_array = array();
 		
-		$q = 'SELECT to_send_lists FROM campaigns WHERE id = '.mysqli_real_escape_string($mysqli, $_GET['c']);
+		$q = 'SELECT to_send_lists, segs FROM campaigns WHERE id = '.mysqli_real_escape_string($mysqli, $_GET['c']);
 		$r = mysqli_query($mysqli, $q);
-		if ($r) while($row = mysqli_fetch_array($r)) $to_send_lists = $row['to_send_lists'];
-		
-		$q2 = 'SELECT name FROM lists WHERE id IN ('.$to_send_lists.')';
-		$r2 = mysqli_query($mysqli, $q2);
-		if ($r2)
+		if ($r) while($row = mysqli_fetch_array($r)) 
 		{
-		    while($row = mysqli_fetch_array($r2))
-		    {
-				$name = stripslashes($row['name']);
-				array_push($name_array, '<span class="label">'.$name.'</span>');
-		    }  
+			$to_send_lists = $row['to_send_lists'];
+			$segs = $row['segs'];
+		}
+		
+		if($to_send_lists!='')
+		{
+			$q2 = 'SELECT name FROM lists WHERE id IN ('.$to_send_lists.')';
+			$r2 = mysqli_query($mysqli, $q2);
+			if ($r2)
+			{
+			    while($row = mysqli_fetch_array($r2))
+			    {
+					$name = stripslashes($row['name']);
+					array_push($name_array, '<span class="label">List: '.$name.'</span>');
+			    }  
+			}
+		}
+		
+		if($segs!='')
+		{
+			$q3 = 'SELECT name FROM seg WHERE id IN ('.$segs.')';
+			$r3 = mysqli_query($mysqli, $q3);
+			if ($r3)
+			{
+			    while($row = mysqli_fetch_array($r3))
+			    {
+					$name = stripslashes($row['name']);
+					array_push($name_array, '<span class="label">Segment: '.$name.'</span>');
+			    }  
+			}
+		}
+		
+		$list_names = implode(' ', $name_array);
+		
+		if($list_names!='')
+			return $list_names;
+		else return 'No data';
+	}
+	
+	//------------------------------------------------------//
+	function get_excluded_lists()
+	//------------------------------------------------------//
+	{
+		global $mysqli;
+		$name_array = array();
+		
+		$q = 'SELECT lists_excl, segs_excl FROM campaigns WHERE id = '.mysqli_real_escape_string($mysqli, $_GET['c']);
+		$r = mysqli_query($mysqli, $q);
+		if ($r) while($row = mysqli_fetch_array($r)) 
+		{
+			$lists_excl = $row['lists_excl'];
+			$segs_excl = $row['segs_excl'];
+		}
+		
+		if($lists_excl!='')
+		{
+			$q2 = 'SELECT name FROM lists WHERE id IN ('.$lists_excl.')';
+			$r2 = mysqli_query($mysqli, $q2);
+			if ($r2)
+			{
+			    while($row = mysqli_fetch_array($r2))
+			    {
+					$name = stripslashes($row['name']);
+					array_push($name_array, '<span class="label">List: '.$name.'</span>');
+			    }  
+			}
+		}
+		
+		if($segs_excl!='')
+		{
+			$q3 = 'SELECT name FROM seg WHERE id IN ('.$segs_excl.')';
+			$r3 = mysqli_query($mysqli, $q3);
+			if ($r3)
+			{
+			    while($row = mysqli_fetch_array($r3))
+			    {
+					$name = stripslashes($row['name']);
+					array_push($name_array, '<span class="label">Segment: '.$name.'</span>');
+			    }  
+			}
 		}
 		
 		$list_names = implode(' ', $name_array);

@@ -136,6 +136,10 @@
     	<a href="<?php echo get_app_info('path');?>/edit-list?i=<?php echo get_app_info('app');?>&l=<?php echo $lid;?>" style="float:right;"><i class="icon-wrench"></i> <?php echo _('List settings');?></a>
     	<a href="#subscribeform" style="float:right;margin-right:20px;" data-toggle="modal"><i class="icon-list-alt"></i> <?php echo _('Subscribe form');?></a>
     	
+    	
+    	<span class="badge" style="float:right;margin:0 20px 0 -15px;"><?php echo get_segments_count();?></span>
+    	<a href="<?php echo get_app_info('path');?>/segments-list?i=<?php echo get_app_info('app');?>&l=<?php echo $lid;?>" style="float:right;margin-right:20px;"><i class="icon-filter"></i> <?php echo _('Segments');?></a>
+    	
     	<?php 
 	    	$q = 'SELECT cron_ares FROM login WHERE id = '.get_app_info('main_userID');
 	    	$r = mysqli_query($mysqli, $q);
@@ -145,7 +149,7 @@
 	    	    	$cron_ares = $row['cron_ares'];
 	    	}	    	
 	    	if($cron_ares):
-    	?>
+    	?>    	
     	<span class="badge" style="float:right;margin:0 20px 0 -15px;"><?php echo get_autoresponder_count();?></span>
     	<a href="<?php echo get_app_info('path');?>/autoresponders-list?i=<?php echo get_app_info('app');?>&l=<?php echo $lid;?>" style="float:right;margin-right:20px;"><i class="icon-time"></i> <?php echo _('Autoresponders');?></a>
     	<?php else:?>
@@ -158,10 +162,10 @@
     	<div id="subscribeform" class="modal hide fade">
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal">&times;</button>
-              <h3><?php echo _('Subscribe form');?></h3>
+              <h3><span class="icon icon-list-alt"></span> <?php echo _('Subscribe form');?></h3>
             </div>
             <div class="modal-body">
-	        <p><?php echo _('The following is a \'ready-to-use\' subscription form URL you can immediately use to collect sign ups to this list:');?></p>
+	        <p><?php echo _('The following is a \'ready-to-use\' subscription form URL you can immediately use to collect sign ups to this list');?>:</p>
 	        
 	        <?php if(version_compare(PHP_VERSION, '5.3.0') >= 0 && function_exists('openssl_encrypt')):?>
 		        <pre id="form-url"><?php echo get_app_info('path');?>/subscription?f=<?php echo short('{"brand":"'.get_app_info('app').'", "list":"'.short($lid).'"}');?></pre>
@@ -170,7 +174,7 @@
 	        <?php endif;?>
 	        
 	        <br/>
-            <p><?php echo _('This is the subscribe form HTML code for');?> <span class="label label-info"><?php echo get_lists_data('name', $lid);?></span>. <?php if(!get_app_info('is_sub_user')): echo _('To sign users up programmatically, use our');?> <a href="https://sendy.co/api" style="text-decoration: underline;" target="_blank"><?php echo _('API');?></a>.<?php endif;?></p>
+            <p><?php echo _('The following is the subscribe form HTML code for this list');?>. <?php if(!get_app_info('is_sub_user')): echo _('To subscribe users programmatically, use the API');?> → <a href="https://sendy.co/api?app_path=<?php echo get_app_info('path');?>" style="text-decoration: underline;" target="_blank">https://sendy.co/api</a>.<?php endif;?></p>
 <pre id="form-code">
 &lt;form action=&quot;<?php echo get_app_info('path');?>/subscribe&quot; method=&quot;POST&quot; accept-charset=&quot;utf-8&quot;&gt;
 	&lt;label for=&quot;name&quot;&gt;Name&lt;/label&gt;&lt;br/&gt;
@@ -203,6 +207,10 @@
 ?>
 
 	&lt;br/&gt;
+	&lt;div style=&quot;display:none;&quot;&gt;
+	&lt;label for=&quot;hp&quot;&gt;HP&lt;/label&gt;&lt;br/&gt;
+	&lt;input type=&quot;text&quot; name=&quot;hp&quot; id=&quot;hp&quot;/&gt;
+	&lt;/div&gt;
 	&lt;input type=&quot;hidden&quot; name=&quot;list&quot; value=&quot;<?php echo short($lid);?>&quot;/&gt;
 	&lt;input type=&quot;submit&quot; name=&quot;submit&quot; id=&quot;submit&quot;/&gt;
 &lt;/form&gt;</pre>
@@ -227,6 +235,7 @@
 		
 		<div class="row-fluid">
     		<div class="span12">
+	    		<div style="margin: -20px 0px 20px 0px; color: #666666;"><?php echo _('Subscribers activity chart');?> <a href="#last-activity-info" data-toggle="modal" class="last-activity-info" title="<?php echo _('Click to learn more');?>"><i class="icon icon-question-sign" style="color: #666666;"></i></a></div>
 		    	<div id="container" style="min-height:200px;margin:0 0 30px 0;"></div>
 	    	</div>
 	    </div>
@@ -273,7 +282,7 @@
 		    <tr>
 		      <th><?php echo _('Name');?></th>
 		      <th><?php echo _('Email');?></th>
-		      <th><?php echo _('Last activity');?></th>
+		      <th><?php echo _('Last activity');?> <a href="#last-activity-info" data-toggle="modal" class="last-activity-info"><i class="icon icon-question-sign"></i></a></th>
 		      <th><?php echo _('Status');?></th>
 		      <th><?php echo _('Unsubscribe');?></th>
 		      <th><?php echo _('Delete');?></th>
@@ -346,6 +355,10 @@
 				  			$unsubscribed = '<span class="label label-inverse">'._('Marked as spam').'</span>';
 				  		if($confirmed==0)
 			  				$unsubscribed = '<span class="label">'._('Unconfirmed').'</span>';
+			  			if($confirmed==0 && $bounced==1)
+			  				$unsubscribed = '<span class="label label-inverse">'._('Bounced').'</span>';
+			  			if($confirmed==0 && $complaint==1)
+			  				$unsubscribed = '<span class="label label-inverse">'._('Marked as spam').'</span>';
 				  			
 				  		if($name=='')
 				  			$name = '['._('No name').']';
@@ -501,6 +514,29 @@
 		);
 	});
 </script>
+
+<!-- Last activity explanation modal window -->
+<div id="last-activity-info" class="modal hide fade">
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal">&times;</button>
+  <h3><?php echo _('What changes a subscriber\'s \'Last activity\' timestamp?');?></h3>
+</div>
+<div class="modal-body">
+    <p><?php echo _('A subscriber\'s \'Last activity\' timestamp is updated when the user:');?></p>
+	    <pre><?php echo _('• opened a campaign or autoresponder
+• clicked a link in a campaign or autoresponder
+• subscribed to a list
+• unsubscribed from a list
+• bounced
+• marked as spam
+• confirmed a double opt-in subscription');?></pre>
+	</p>
+	<p><?php echo _('Subscribers are sorted by \'Last activity\' in the list. Therefore, subscribers who did any of the above activity will float to the top of the subscriber list. You will also see changes in the \'Subscribers activity chart\'.');?></p>
+</div>
+<div class="modal-footer">
+  <a href="#" class="btn btn-inverse" data-dismiss="modal"><i class="icon icon-ok-sign" style="margin-top: 5px;"></i> <?php echo _('Close');?></a>
+</div>
+</div>
 
 <?php 
 	if(!$cron_ares):

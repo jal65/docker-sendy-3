@@ -68,6 +68,7 @@ class AmazonSES
     protected function
     make_request
     ($query) {
+	    error_reporting(0);
     	$dbHost=$dbUser=$dbPass=$dbName='';
 		if(file_exists('../config.php')) require '../config.php';
 		$server_path_array1 = explode('/', $_SERVER['SCRIPT_FILENAME']);    	

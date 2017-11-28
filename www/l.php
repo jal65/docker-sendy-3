@@ -42,6 +42,7 @@
 	$userID = short($i_array[0], true);
 	$link_id = short($i_array[1], true);
 	$campaign_id = short($i_array[2], true);
+	$time = time();
 	
 	$q = 'SELECT clicks, link, ares_emails_id FROM links WHERE id = '.$link_id;
 	$r = mysqli_query($mysqli, $q);
@@ -67,6 +68,10 @@
 	$q2 = 'UPDATE links SET clicks = "'.$val.'" WHERE id = '.$link_id;
 	$r2 = mysqli_query($mysqli, $q2);
 	if ($r2){}
+	
+	//Update subscriber's timestamp
+	$q = 'UPDATE subscribers SET timestamp = "'.$time.'" WHERE id = '.$userID;
+	mysqli_query($mysqli, $q);
 	
 	//Set open
 	$q = $ares_emails_id=='' ? 'SELECT opens FROM campaigns WHERE id = '.$campaign_id : 'SELECT opens FROM ares_emails WHERE id = '.$campaign_id;

@@ -48,32 +48,29 @@
 		date_default_timezone_set($timezone);
 		$campaign_id = is_numeric($_POST['campaign_id']) ? $_POST['campaign_id'] : exit;
 		$app = is_numeric($_POST['app']) ? $_POST['app'] : exit;
-		$email_list = $_POST['email_lists'];
+		$email_list = mysqli_real_escape_string($mysqli, $_POST['email_lists']);
+		$email_list_excl = mysqli_real_escape_string($mysqli, $_POST['email_lists_excl']);
+		$email_lists_segs = mysqli_real_escape_string($mysqli, $_POST['email_lists_segs']);
+		$email_lists_segs_excl = mysqli_real_escape_string($mysqli, $_POST['email_lists_segs_excl']);
 		$paypal_email = $_POST['paypal2'];
 		$total = $_POST['grand_total_val2'];		
-		$send_date = $_POST['send_date'];
-		$hour = $_POST['hour'];
-		$ampm = $_POST['ampm'];
-		if($ampm=='pm' && $hour!=12)
-			$hour += 12;
-		if($ampm=='am' && $hour==12)
-			$hour = 00;
-		$min = $_POST['min'];
-		$send_date_array = explode('-', $send_date);
-		$month = $send_date_array[0];
-		$day = $send_date_array[1];
-		$year = $send_date_array[2];
-		$the_date = mktime($hour, $min, 0, $month, $day, $year);
+		$send_date = mysqli_real_escape_string($mysqli, $_POST['send_date']);
+		$hour = mysqli_real_escape_string($mysqli, $_POST['hour']);
+		$min = mysqli_real_escape_string($mysqli, $_POST['min']);
+		$ampm = mysqli_real_escape_string($mysqli, $_POST['ampm']);
+		$the_date = strtotime("$send_date $hour.$min$ampm");
 		$total_recipients = mysqli_real_escape_string($mysqli, $_POST['total_recipients2']);
 	}
 	else
 	{
 		$campaign_id = mysqli_real_escape_string($mysqli, $_POST['cid']);
 		$app = mysqli_real_escape_string($mysqli, $_POST['uid']);
-		$email_list = $_POST['email_list'];
+		$email_list = mysqli_real_escape_string($mysqli, $_POST['in_list']);
+		$email_list_excl = mysqli_real_escape_string($mysqli, $_POST['ex_list']);
+		$email_lists_segs = mysqli_real_escape_string($mysqli, $_POST['in_list_seg']);
+		$email_lists_segs_excl = mysqli_real_escape_string($mysqli, $_POST['ex_list_seg']);
 		$paypal_email = $_POST['paypal'];
 		$total = $_POST['grand_total_val'];
-		$email_list_implode = implode(',', $email_list);
 		$total_recipients = mysqli_real_escape_string($mysqli, $_POST['total_recipients']);
 	}
 	
@@ -121,9 +118,9 @@
 <input type="hidden" name="no_shipping" value="1">
 <input type="hidden" name="item_name" value="<?php echo _('Campaign for');?> <?php echo htmlentities($title, ENT_QUOTES);?>">
 <?php if($schedule=='true'):?>
-<input type="hidden" name="return" value="<?php echo htmlentities(APP_PATH, ENT_QUOTES);?>/sending?i=<?php echo htmlentities($app, ENT_QUOTES);?>&c=<?php echo htmlentities($campaign_id, ENT_QUOTES);?>&e=<?php echo htmlentities($email_list, ENT_QUOTES);?>&s=true&date=<?php echo htmlentities($the_date, ENT_QUOTES);?>&timezone=<?php echo htmlentities($timezone, ENT_QUOTES);?>&recipients=<?php echo htmlentities($total_recipients, ENT_QUOTES);?>">
+<input type="hidden" name="return" value="<?php echo htmlentities(APP_PATH, ENT_QUOTES);?>/sending?i=<?php echo htmlentities($app, ENT_QUOTES);?>&c=<?php echo htmlentities($campaign_id, ENT_QUOTES);?>&e=<?php echo htmlentities($email_list, ENT_QUOTES);?>&ex=<?php echo htmlentities($email_list_excl, ENT_QUOTES);?>&e_segs=<?php echo htmlentities($email_lists_segs, ENT_QUOTES);?>&ex_segs=<?php echo htmlentities($email_lists_segs_excl, ENT_QUOTES);?>&s=true&date=<?php echo htmlentities($the_date, ENT_QUOTES);?>&timezone=<?php echo htmlentities($timezone, ENT_QUOTES);?>&recipients=<?php echo htmlentities($total_recipients, ENT_QUOTES);?>">
 <?php else:?>
-<input type="hidden" name="return" value="<?php echo htmlentities(APP_PATH, ENT_QUOTES);?>/sending?i=<?php echo htmlentities($app, ENT_QUOTES)?>&c=<?php echo htmlentities($campaign_id, ENT_QUOTES);?>&e=<?php echo htmlentities($email_list_implode, ENT_QUOTES);?>&cr=<?php echo htmlentities($cron, ENT_QUOTES);?>&recipients=<?php echo htmlentities($total_recipients, ENT_QUOTES);?>">
+<input type="hidden" name="return" value="<?php echo htmlentities(APP_PATH, ENT_QUOTES);?>/sending?i=<?php echo htmlentities($app, ENT_QUOTES);?>&c=<?php echo htmlentities($campaign_id, ENT_QUOTES);?>&e=<?php echo htmlentities($email_list, ENT_QUOTES);?>&ex=<?php echo htmlentities($email_list_excl, ENT_QUOTES);?>&e_segs=<?php echo htmlentities($email_lists_segs, ENT_QUOTES);?>&ex_segs=<?php echo htmlentities($email_lists_segs_excl, ENT_QUOTES);?>&cr=<?php echo htmlentities($cron, ENT_QUOTES);?>&recipients=<?php echo htmlentities($total_recipients, ENT_QUOTES);?>">
 <?php endif;?>
 <input type="hidden" name="cancel_return" value="<?php echo htmlentities(APP_PATH, ENT_QUOTES);?>/send-to?i=<?php echo htmlentities($app, ENT_QUOTES);?>&c=<?php echo htmlentities($campaign_id, ENT_QUOTES);?>">
 <input type="hidden" name="amount" value="<?php echo htmlentities($total, ENT_QUOTES);?>">

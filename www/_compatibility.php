@@ -1,13 +1,13 @@
 <?php 	
 	ini_set('display_errors', 0);
 	define(PHP_VER, '5.2');
-	define(TOTAL_SCORE, '9');
+	define(TOTAL_SCORE, '10');
 	$result = array();
 	$score = 0;
 
 	//check PHP version
 	if(version_compare(PHP_VERSION, PHP_VER)==-1)
-		$result[] = '<span class="label label-important"><i class="icon-remove icon-white"></i> Sendy requires PHP '.PHP_VER.' to run, your have '.PHP_VERSION.'</span>';
+		$result[] = '<span class="label label-important"><i class="icon-remove icon-white"></i> Sendy requires PHP '.PHP_VER.' and above to run, your have '.PHP_VERSION.'</span>';
 	else
 	{
 		$result[] = '<span class="label label-success"><i class="icon-ok icon-white"></i> Your PHP version is '.PHP_VERSION.'</span>';
@@ -47,15 +47,15 @@
 	}
 		
 	//check
-	$exts = array('hash', 'curl', 'gettext');
+	$exts = array('hash', 'curl', 'gettext', 'simplexml');
 	foreach($exts as $ext) {
 		if(extension_loaded($ext))
 		{
-			$result[] = '<span class="label label-success"><i class="icon-ok icon-white"></i> '.$ext.' is enabled</span>';
+			$result[] = '<span class="label label-success"><i class="icon-ok icon-white"></i> '.$ext.' is installed</span>';
 			$score++;
 		}
 		else
-			$result[] = '<span class="label label-important"><i class="icon-remove icon-white"></i> '.$ext.' is not enabled</span>';
+			$result[] = '<span class="label label-important"><i class="icon-remove icon-white"></i> '.$ext.' is not installed</span>';
 	}
 	
 	//check if curl_exec is enabled
@@ -67,10 +67,10 @@
 	}
 	if(curl_exec_enabled())
 	{
-		$result[] = '<span class="label label-success"><i class="icon-ok icon-white"></i> curl_exec is enabled</span>';
+		$result[] = '<span class="label label-success"><i class="icon-ok icon-white"></i> curl_exec is installed</span>';
 		$score++;
 	}
-	else $result[] = '<span class="label label-important"><i class="icon-remove icon-white"></i> curl_exec is disabled</span>';
+	else $result[] = '<span class="label label-important"><i class="icon-remove icon-white"></i> curl_exec is not installed</span>';
 	
 	//check if curl_multi_exec is enabled
 	function curl_multi_exec_enabled()
@@ -81,10 +81,10 @@
 	}
 	if(curl_multi_exec_enabled())
 	{
-		$result[] = '<span class="label label-success"><i class="icon-ok icon-white"></i> curl_multi_exec is enabled</span>';
+		$result[] = '<span class="label label-success"><i class="icon-ok icon-white"></i> curl_multi_exec is installed</span>';
 		$score++;
 	}
-	else $result[] = '<span class="label label-important"><i class="icon-remove icon-white"></i> curl_multi_exec is disabled</span>';
+	else $result[] = '<span class="label label-important"><i class="icon-remove icon-white"></i> curl_multi_exec is not installed</span>';
 	
 	if($_GET['i']==1)
 	{

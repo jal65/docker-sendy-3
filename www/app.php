@@ -9,10 +9,14 @@
 			echo '<script type="text/javascript">window.location="'.addslashes(get_app_info('path')).'/app?i='.get_app_info('restricted_to_app').'"</script>';
 			exit;
 		}
-		else if(get_app_info('reports_only'))
+		else if(get_app_info('campaigns_only')==1 && get_app_info('templates_only')==1 && get_app_info('lists_only')==1 && get_app_info('reports_only')==1)
 		{
-			echo '<script type="text/javascript">window.location="'.addslashes(get_app_info('path')).'/reports?i='.get_app_info('restricted_to_app').'"</script>';
+			echo '<script type="text/javascript">window.location="'.addslashes(get_app_info('path')).'/logout"</script>';
 			exit;
+		}
+		else if(get_app_info('campaigns_only')==1)
+		{
+			go_to_next_allowed_section();
 		}
 	}
 ?>
@@ -175,29 +179,11 @@
 				  				$scheduled_title = _('Define recipients & send');
 				  			}
 				  			else
-				  			{
-				  				//get lists name
-				  				$j = 1;
-				  				$q2 = 'SELECT name FROM lists WHERE id in ('.$scheduled_lists.')';
-				  				$r2 = mysqli_query($mysqli, $q2);
-				  				if ($r2 && mysqli_num_rows($r2) > 0)
-				  				{
-				  					$scheduled_list_name = '';
-				  				    while($row = mysqli_fetch_array($r2))
-				  				    {
-				  						$scheduled_list_name .= $row['name'];
-				  						if($j < mysqli_num_rows($r2) && $j != mysqli_num_rows($r2)-1)
-				  							$scheduled_list_name .= ', ';
-				  						else if($j == mysqli_num_rows($r2)-1)
-				  							$scheduled_list_name .= ' '._('and').' ';
-				  						$j++;
-				  				    }  
-				  				}
-				  				
+				  			{				  				
 				  				date_default_timezone_set($timezone);
 				  				$send_date_totime = strftime("%a, %b %d, %Y %I:%M%p", $send_date);
 				  				$label = '<span class="label label-info">'._('Scheduled').'</span>';
-				  				$scheduled_title = _('Scheduled on').' '.$send_date_totime.' ('.$timezone.') '._('to').' ('.$scheduled_list_name.')';
+				  				$scheduled_title = _('Scheduled on').' '.$send_date_totime.' ('.$timezone.')';
 				  			}
 			  			}
 			  			
@@ -271,7 +257,7 @@
 				  					{
 					  					echo '
 					  						<tr id="'.$id.'">
-										      <td id="label'.$id.'"><span class="label label-warning">'._('Sending').'</span> <a href="'.get_app_info('path').'/report?i='.get_app_info('app').'&c='.$id.'" title="'._('Currently sending your campaign to').' '.number_format($to_send).' '._('recipients').' ('._('excluding duplicates between lists').')">'.$campaign_title.'</a> ';
+										      <td id="label'.$id.'"><span class="label label-warning">'._('Sending').'</span> <a href="'.get_app_info('path').'/report?i='.get_app_info('app').'&c='.$id.'" title="'._('Currently sending your campaign to').' '.number_format($to_send).' '._('recipients').'">'.$campaign_title.'</a> ';
 										      
 										if(!get_app_info('cron_sending')) 
 										echo '
@@ -396,7 +382,7 @@
 				  					{
 				  					echo '
 				  						<tr id="'.$id.'">
-									      <td id="label'.$id.'"><span class="label label-warning">'._('Preparing').'</span> <a href="javascript:void(0)" title="'._('Preparing to send your campaign to').' '.number_format($to_send).' '._('recipients')._(' (excluding duplicates between lists), please wait.').'">'.$campaign_title.'</a></td>
+									      <td id="label'.$id.'"><span class="label label-warning">'._('Preparing').'</span> <a href="javascript:void(0)" title="'._('Preparing to send your campaign to').' '.number_format($to_send).' '._('recipients').'">'.$campaign_title.'</a></td>
 									      <td id="progress'.$id.'">'._('Checking..').'</td>
 									      <td id="sent-status'.$id.'">'._('Preparing to send').'..</td>
 									      <td><span class="label">'.$open_data.'</td>
@@ -560,7 +546,14 @@
 			  				
 				  			echo '
 				  				<tr id="'.$id.'">
-							      <td><span class="label label-success">'._('Sent').'</span></a> <a href="'.get_app_info('path').'/report?i='.get_app_info('app').'&c='.$id.'" title="'._('View report for this campaign').'">'.$campaign_title.'</a>'.$download_errors.'</td>
+							      '; 
+							
+							if(!get_app_info('is_sub_user') || (get_app_info('is_sub_user') && get_app_info('reports_only')==0))
+								echo '<td><span class="label label-success">'._('Sent').'</span></a> <a href="'.get_app_info('path').'/report?i='.get_app_info('app').'&c='.$id.'" title="'._('View report for this campaign').'">'.$campaign_title.'</a>'.$download_errors.'</td>'; 
+							else
+								echo '<td><span class="label label-success">'._('Sent').'</span></a> '.$campaign_title.''.$download_errors.'</td>'; 
+							
+							echo '
 							      <td>'.number_format($recipients).'</td>
 							      <td>'.parse_date($sent, 'long', true).'</td>
 							      <td><span class="label">'.$open_data.'</td>
