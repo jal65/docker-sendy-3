@@ -25,7 +25,7 @@ services:
       MYSQL_PORT : 3306
       SENDY_PATH : http://m.emkt.eu
       SENDY_BASE_DATA_FILE: emkt_sendy_bkp_20170412_sendy_2128.sql
-      SENDY_LOCAL_EMAIL_TO : ${LOCAL_EMAIL_TO}
+      SENDY_LOCAL_EMAIL_TO : jose@lourenco.ws
 
 volumes:
   mydbsendy:
