@@ -6,7 +6,6 @@
 -- Generation Time: Apr 12, 2017 at 08:21 PM
 -- Server version: 5.5.52-0+deb7u1
 -- PHP Version: 5.4.45-0+deb7u5
-USE emkt_sendy;
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";

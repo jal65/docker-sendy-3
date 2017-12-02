@@ -1,15 +1,18 @@
 version: '2'
+
 services:
   mysql-sendy:
     image: mysql:5.7
     ports:
       - 3306:3306
     volumes:
-      - /var/lib/mysql
+      - mydbsendy:/var/lib/mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: my_passwd
-      MYSQL_DATABASE: sendy_db
+      MYSQL_ROOT_PASSWORD: RiNoLio131
+      MYSQL_DATABASE: emkt_sendy
+      SENDY_BASE_DATA_FILE: emkt_sendy_bkp_20170412_sendy_2128.sql
+
   sendy:
     build: .
     ports:
@@ -17,9 +20,12 @@ services:
     links:
       - mysql-sendy:mysql
     environment:
-      MYSQL_ROOT_PASSWORD: my_passwd
-      MYSQL_DATABASE: sendy_db
+      MYSQL_ROOT_PASSWORD: RiNoLio131
+      MYSQL_DATABASE: emkt_sendy
       MYSQL_PORT : 3306
-      SENDY_PATH : http://sendy.my_domain.com
+      SENDY_PATH : http://m.emkt.eu
       SENDY_ENV : development
       SENDY_LOCAL_EMAIL_TO : ${LOCAL_EMAIL_TO}
+volumes:
+  mydbsendy:
+    driver: "local"

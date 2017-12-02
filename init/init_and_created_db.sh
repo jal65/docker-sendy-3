@@ -7,5 +7,5 @@ mysql --host=mysql --port=$MYSQL_PORT --user=root --password=$MYSQL_ROOT_PASSWOR
 mysql --host=mysql --port=$MYSQL_PORT --user=root --password=$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE ${MYSQL_DATABASE};"
 
 if [ -n "$SENDY_BASE_DATA_FILE" ]; then
-#    mysql --host=mysql --port=$MYSQL_PORT --user=root --password=$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < $SENDY_BASE_DATA_FILE
+    mysql --host=mysql --port=$MYSQL_PORT --user=root --password=$MYSQL_ROOT_PASSWORD $MYSQL_DATABASE < $SENDY_BASE_DATA_FILE
 fi
