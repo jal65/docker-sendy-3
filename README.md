@@ -3,6 +3,13 @@
 
 **This is a Docker container with a full installation of Sendy 3.0.4.0 with everything set-up (permissions, apache, cron, php-curl, php-xml, etc) auto-responders will be enabled as well.**
 
+- Use a docker named volume for mysql (persistent data).
+- Added line at the end of /etc/mysql/mysql.conf.d/mysqld.cnf' required for Sendy to work with php7:
+
+```
+sql_mode = STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+```
+See: [https://sendy.co/forum/discussion/7752/#Item_6]
 
 ***Previous informatiom:***
 Inspired by :  https://github.com/svtek/Sendy-Docker
