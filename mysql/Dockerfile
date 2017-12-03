@@ -1,3 +1,6 @@
+TODO:
+Create a Dockerfile for mysql with the sql_mode line.
+
 FROM mysql:5.7
 MAINTAINER JAL <jal65.dev@gmail.com>
 
