@@ -1,5 +1,10 @@
-**This is a Docker container with a full installation of Sendy 2.1.2.7 with everything set-up (permissions, apache, cron, php-curl, php-xml, etc) auto-responders will be enabled as well.**
+***Based on repository [https://github.com/emmanuelvisage/docker-sendy]]***
 
+
+**This is a Docker container with a full installation of Sendy 3.0.4.0 with everything set-up (permissions, apache, cron, php-curl, php-xml, etc) auto-responders will be enabled as well.**
+
+
+***Previous informatiom:***
 Inspired by :  https://github.com/svtek/Sendy-Docker
 
 I also externalized all mandatory variables as env variables to make it more docker friendly.
@@ -124,4 +129,3 @@ If you have more than one developer make the SENDY_PATH a variable on your machi
 SENDY_ENV: development
 SENDY_LOCAL_EMAIL_TO : ${LOCAL_EMAIL_TO} // I ve done that because my local email is set as a env var on my host machine but you can replace with any email address.
 ```
-
