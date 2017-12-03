@@ -2,7 +2,7 @@ version: '2'
 
 services:
   mysql-sendy:
-    image: mysql:5.7
+    image: jal65/mysql57-cnf-fix:0.01
     ports:
       - 3306:3306
     volumes:
