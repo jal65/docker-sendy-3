@@ -1,11 +1,7 @@
 version: '2'
 services:
   mysql-sendy:
-<<<<<<< HEAD
-    image: jal65/mysql57-cnf-fix:0.01
-=======
     build: ./mysql
->>>>>>> dockerfile_per_container
     ports:
       - 3306:3306
     volumes:
@@ -18,11 +14,7 @@ services:
       SENDY_PATH : http://m.emkt.eu
 
   sendy:
-<<<<<<< HEAD
-    build: ./apache-php
-=======
     build: ./apache+php
->>>>>>> dockerfile_per_container
     ports:
       - 80:80
     links:
