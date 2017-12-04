@@ -31,7 +31,7 @@ ADD www /var/www/site
 # Copy this repo into place.
 ADD init /var/www/init
 
-RUN chmod 777 /var/www/site/uploads
+RUN chmod -R 777 /var/www/site/uploads
 
 # Add autoresponders and scheduled files in the cron directory
 ADD autoresponders /etc/cron.d/sendy-auto-responder-cron
