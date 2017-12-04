@@ -2,7 +2,7 @@ version: '2'
 
 services:
   mysql-sendy:
-    image: jal65/mysql57-cnf-fix:0.01
+    build: ./mysql
     ports:
       - 3306:3306
     volumes:
@@ -14,7 +14,7 @@ services:
       SENDY_BASE_DATA_FILE: emkt_sendy_bkp_20170412_sendy_2128.sql
 
   sendy:
-    build: .
+    build: ./apache+php
     ports:
       - 80:80
     links:
