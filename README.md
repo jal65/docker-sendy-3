@@ -22,7 +22,7 @@ I also externalized all mandatory variables as env variables to make it more doc
  Once you have setup the project run:  
 
 ```
-docker build -t sendy
+docker-composer up
 ```
 
 
@@ -35,6 +35,10 @@ docker run -p 8080:80 -d sendy -e MYSQL_ROOT_PASSWORD=my_root_passwd -e MYSQL_DA
 -p 8080:80 publishes port 80 in the container to 8080 on the host machine.
 -d detaches from the process, use docker ps and docker stop to … stop.
 -e add the environment variables to allow Sendy to connect to the MySQL DB
+
+# IP address of container
+You want to run this command, for example, to know the IP address assigned to the container.
+`docker inspect <Container ID or Name> |  grep "IPAddress"`
 
 # Docker compose
 Here is an example of a docker-compose file that will get you running in minutes
