@@ -18,11 +18,17 @@ I also externalized all mandatory variables as env variables to make it more doc
 
 **I had to modify the sendy config.php file to do that so keep in mind that if you use another version of sendy you will probably have to re-do these modifications and I can't guarantee that the php version and the loaded libraries will remain the same.**
 
-# Building the container
+# Building the containers
  Once you have setup the project run:  
 
 ```
 docker-composer up
+```
+
+or, separately,
+```
+docker build  mysql/
+docker build  apache+php/
 ```
 
 
